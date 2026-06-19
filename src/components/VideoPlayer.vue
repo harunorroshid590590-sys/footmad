@@ -3,23 +3,27 @@
     <!-- Loading Spinner -->
     <div
       v-if="loading"
-      class="absolute inset-0 flex items-center justify-center z-20 bg-black/80"
+      class="absolute inset-0 flex flex-col items-center justify-center gap-3 z-20 bg-black/80"
     >
-      <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <div class="w-11 h-11 border-[3px] border-primary border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-text-muted text-sm">Loading stream…</p>
     </div>
 
     <!-- Error Message -->
     <div
       v-if="error"
-      class="absolute inset-0 flex flex-col items-center justify-center z-20 bg-black/90 p-4"
+      class="absolute inset-0 z-20 flex flex-col items-center justify-center text-center bg-black/90 backdrop-blur-sm px-5 py-6"
     >
-      <svg class="w-16 h-16 text-red-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-      <p class="text-white text-center mb-4">{{ error }}</p>
+      <div class="w-12 h-12 rounded-full bg-accent/15 flex items-center justify-center mb-3">
+        <svg class="w-6 h-6 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008M10.34 3.94L1.7 18a1.5 1.5 0 001.3 2.25h18a1.5 1.5 0 001.3-2.25L13.66 3.94a1.5 1.5 0 00-2.6 0z" />
+        </svg>
+      </div>
+      <h3 class="text-white text-base sm:text-lg font-semibold">Stream unavailable</h3>
+      <p class="text-text-muted text-xs sm:text-sm max-w-[18rem] mt-1">This stream couldn’t be played. Try another server.</p>
       <button
         @click="retry"
-        class="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg transition-colors"
+        class="mt-4 bg-primary hover:bg-primary-dark text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
       >
         Retry
       </button>

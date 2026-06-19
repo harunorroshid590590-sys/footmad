@@ -18,23 +18,23 @@
         <div tabindex="0" data-focus-default class="relative bg-black rounded-2xl overflow-hidden shadow-card outline-none">
           <VideoPlayer
             v-if="currentServer"
-            :key="`${channel._id}-${currentIndex}`"
+            :key="`${channel._id}-${currentIndex}-${reloadKey}`"
             :stream="currentServer"
             :is-live="true"
             @error="handlePlayerError"
-            @ready="playerError = null"
+            @ready="playerError = false"
           />
           <div v-else class="aspect-video flex items-center justify-center text-text-muted">
             No streams available for this channel.
           </div>
 
-          <div v-if="playerError" class="absolute inset-0 flex flex-col items-center justify-center bg-black/85 p-6 text-center">
-            <p class="text-white font-semibold mb-2">Stream unavailable</p>
-            <p class="text-text-muted text-sm mb-4">{{ playerError }}</p>
-            <button v-if="servers.length > 1" @click="tryNextServer" class="bg-primary hover:bg-primary-dark text-white px-5 py-2 rounded-lg">
-              Try next server
-            </button>
-          </div>
+          <PlayerOverlay
+            v-if="playerError"
+            :message="errorMessage"
+            :server-name="currentServer?.title"
+            :has-next="false"
+            @retry="retryCurrent"
+          />
         </div>
 
         <!-- Server tabs -->
@@ -80,8 +80,10 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import VideoPlayer from '@/components/VideoPlayer.vue'
+import PlayerOverlay from '@/components/PlayerOverlay.vue'
 import { normalizeServers } from '@/utils/stream'
 import { resolveAsset } from '@/utils/assets'
+import { friendlyStreamError } from '@/utils/playerError'
 
 const route = useRoute()
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5007/api'
@@ -89,7 +91,9 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5007/api'
 const channel = ref(null)
 const loading = ref(true)
 const error = ref(null)
-const playerError = ref(null)
+const playerError = ref(false)
+const errorMessage = ref('')
+const reloadKey = ref(0)
 const currentIndex = ref(0)
 const logoErr = ref(false)
 
@@ -100,7 +104,7 @@ const logoUrl = computed(() => resolveAsset(channel.value?.logo))
 const loadChannel = async () => {
   loading.value = true
   error.value = null
-  playerError.value = null
+  playerError.value = false
   currentIndex.value = 0
   try {
     const { data } = await axios.get(`${API_URL}/channels/${route.params.id}`)
@@ -115,22 +119,30 @@ const loadChannel = async () => {
 
 const selectServer = (index) => {
   currentIndex.value = index
-  playerError.value = null
+  playerError.value = false
 }
 
 const tryNextServer = () => {
   if (currentIndex.value < servers.value.length - 1) {
     currentIndex.value += 1
-    playerError.value = null
-  } else {
-    playerError.value = 'All available servers failed to load.'
+    playerError.value = false
   }
 }
 
+const retryCurrent = () => {
+  playerError.value = false
+  reloadKey.value += 1
+}
+
 const handlePlayerError = (issue) => {
-  const name = currentServer.value?.title || 'This server'
-  const detail = issue?.details || issue?.message || 'could not be played.'
-  playerError.value = `${name} could not be played. ${detail}`
+  const detail = issue?.details || issue?.message || ''
+  // Silently fail over; only show the error once all servers are exhausted.
+  if (currentIndex.value < servers.value.length - 1) {
+    tryNextServer()
+    return
+  }
+  errorMessage.value = friendlyStreamError(detail)
+  playerError.value = true
 }
 
 const shareChannel = async () => {

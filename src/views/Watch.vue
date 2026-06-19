@@ -34,17 +34,19 @@
           <div tabindex="0" data-focus-default class="relative bg-black rounded-2xl overflow-hidden shadow-card outline-none">
             <VideoPlayer
               v-if="currentStream"
-              :key="`${match.id}-${currentServerIndex}`"
+              :key="`${match.id}-${currentServerIndex}-${reloadKey}`"
               :stream="currentStream"
               :is-live="match.isLive"
               @error="handlePlayerError"
               @ready="handlePlayerReady"
             />
-            <div v-if="playerError" class="absolute inset-0 flex flex-col items-center justify-center bg-black/85 p-6 text-center">
-              <p class="text-white text-lg font-semibold mb-2">Stream unavailable</p>
-              <p class="text-text-muted text-sm mb-4">{{ playerError }}</p>
-              <button @click="tryNextServer" class="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg transition-colors">Try Next Server</button>
-            </div>
+            <PlayerOverlay
+              v-if="playerError"
+              :message="errorMessage"
+              :server-name="currentStream?.title"
+              :has-next="false"
+              @retry="retryCurrent"
+            />
           </div>
 
           <!-- Server tabs -->
@@ -128,9 +130,11 @@ import { computed, ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import axios from 'axios'
 import VideoPlayer from '@/components/VideoPlayer.vue'
+import PlayerOverlay from '@/components/PlayerOverlay.vue'
 import MatchCard from '@/components/MatchCard.vue'
 import { useMatchesStore } from '@/stores/matches'
 import { resolveAsset } from '@/utils/assets'
+import { friendlyStreamError } from '@/utils/playerError'
 
 const route = useRoute()
 const matchesStore = useMatchesStore()
@@ -139,7 +143,9 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5007/api'
 const match = ref(null)
 const loading = ref(true)
 const error = ref(null)
-const playerError = ref(null)
+const playerError = ref(false)
+const errorMessage = ref('')
+const reloadKey = ref(0)
 const currentServerIndex = ref(0)
 const homeErr = ref(false)
 const awayErr = ref(false)
@@ -236,7 +242,7 @@ const loadMatch = async () => {
   }
   loading.value = true
   error.value = null
-  playerError.value = null
+  playerError.value = false
   currentServerIndex.value = 0
   homeErr.value = false
   awayErr.value = false
@@ -261,31 +267,34 @@ const loadMatch = async () => {
 
 const switchServer = (index) => {
   currentServerIndex.value = index
-  playerError.value = null
+  playerError.value = false
 }
 
 const tryNextServer = () => {
   if (currentServerIndex.value < servers.value.length - 1) {
     currentServerIndex.value += 1
-    playerError.value = null
-    return
+    playerError.value = false
   }
-  playerError.value = 'All available servers failed to load for this match.'
+}
+
+const retryCurrent = () => {
+  playerError.value = false
+  reloadKey.value += 1 // force the player to remount and reload the same server
 }
 
 const handlePlayerError = (playerIssue) => {
-  const serverName = currentStream.value?.title || 'This server'
-  const detail = playerIssue?.details || playerIssue?.message || playerIssue?.data?.message || 'could not be played.'
-  playerError.value = `${serverName} could not be played. ${detail}`
+  const detail = playerIssue?.details || playerIssue?.message || playerIssue?.data?.message || ''
+  // Silently fail over to the next server; only surface an error once all are exhausted.
   if (currentServerIndex.value < servers.value.length - 1) {
-    window.setTimeout(() => {
-      if (playerError.value) tryNextServer()
-    }, 300)
+    tryNextServer()
+    return
   }
+  errorMessage.value = friendlyStreamError(detail)
+  playerError.value = true
 }
 
 const handlePlayerReady = () => {
-  playerError.value = null
+  playerError.value = false
 }
 
 const shareMatch = async () => {
