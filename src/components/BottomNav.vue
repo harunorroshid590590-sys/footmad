@@ -1,74 +1,60 @@
 <template>
   <nav class="fixed bottom-0 left-0 right-0 z-50 glass border-t border-border md:hidden">
-    <div class="flex items-center justify-around h-16">
+    <div class="flex items-center justify-center gap-12 h-16">
+      <!-- Live / Broadcast -->
       <router-link
-        to="/"
-        class="flex flex-col items-center justify-center space-y-1 px-4 py-2 transition-colors"
-        :class="isActive('/') ? 'text-primary' : 'text-text-muted'"
+        to="/?tab=live"
+        class="flex flex-col items-center justify-center transition-colors"
+        :class="isLiveActive ? 'text-accent' : 'text-text-muted'"
+        aria-label="Live"
       >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none" />
+          <path stroke-linecap="round" d="M7.8 7.8a6 6 0 000 8.4M16.2 16.2a6 6 0 000-8.4M5 5a9.5 9.5 0 000 14M19 5a9.5 9.5 0 010 14" />
         </svg>
-        <span class="text-xs">Home</span>
       </router-link>
 
+      <!-- Channels / TV (center) -->
       <router-link
-        to="/#live"
-        class="flex flex-col items-center justify-center space-y-1 px-4 py-2 transition-colors"
-        :class="isActive('/#live') ? 'text-primary' : 'text-text-muted'"
+        to="/channels"
+        class="flex items-center justify-center -mt-1"
+        aria-label="Channels"
       >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-        </svg>
-        <span class="text-xs">Live</span>
+        <span
+          class="w-12 h-12 rounded-xl flex items-center justify-center border transition-colors"
+          :class="isChannelsActive
+            ? 'bg-primary border-primary text-white shadow-neon'
+            : 'bg-card border-border text-text-muted'"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <rect x="3" y="7" width="18" height="13" rx="2" />
+            <path stroke-linecap="round" d="M8 3l4 4 4-4" />
+          </svg>
+        </span>
       </router-link>
 
+      <!-- Playlists -->
       <router-link
-        to="/category/all"
-        class="flex flex-col items-center justify-center space-y-1 px-4 py-2 transition-colors"
-        :class="isActive('/category') ? 'text-primary' : 'text-text-muted'"
+        to="/?tab=playlists"
+        class="flex flex-col items-center justify-center transition-colors"
+        :class="isPlaylistsActive ? 'text-primary-light' : 'text-text-muted'"
+        aria-label="Playlists"
       >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h11M4 12h11M4 18h7M17 10v8a2 2 0 11-2-2h2z" />
         </svg>
-        <span class="text-xs">Sports</span>
-      </router-link>
-
-      <router-link
-        to="/#upcoming"
-        class="flex flex-col items-center justify-center space-y-1 px-4 py-2 transition-colors"
-        :class="isActive('/#upcoming') ? 'text-primary' : 'text-text-muted'"
-      >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <span class="text-xs">Upcoming</span>
-      </router-link>
-
-      <router-link
-        to="/favorites"
-        class="flex flex-col items-center justify-center space-y-1 px-4 py-2 transition-colors"
-        :class="isActive('/favorites') ? 'text-primary' : 'text-text-muted'"
-      >
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-        <span class="text-xs">Me</span>
       </router-link>
     </div>
   </nav>
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
-const isActive = (path) => {
-  if (path === '/') {
-    return route.path === '/'
-  }
-  return route.path.startsWith(path)
-}
+const isLiveActive = computed(() => route.path === '/' && route.query.tab === 'live')
+const isChannelsActive = computed(() => route.path.startsWith('/channels'))
+const isPlaylistsActive = computed(() => route.path === '/' && route.query.tab === 'playlists')
 </script>

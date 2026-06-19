@@ -7,24 +7,30 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#7F25D3',
-        'primary-dark': '#5A1A94',
-        'primary-light': '#A855F7',
-        background: '#050507',
-        card: '#0D0D12',
-        'card-hover': '#15151A',
+        // FootMad dark-navy theme. Token names kept stable so existing
+        // classes (bg-card, text-text-muted, border-border, etc.) re-theme automatically.
+        primary: '#3B6FF6',
+        'primary-dark': '#2554C7',
+        'primary-light': '#6B93FF',
+        accent: '#EF4444',        // LIVE red
+        'accent-dark': '#B91C1C',
+        background: '#060A14',     // deep navy-black
+        surface: '#0B1120',
+        card: '#0F1626',
+        'card-hover': '#182236',
         text: '#FFFFFF',
-        'text-muted': '#9A9AA5',
-        border: 'rgba(127,37,211,0.45)',
-        glow: '#7F25D3',
+        'text-muted': '#8B95AC',
+        border: 'rgba(255,255,255,0.08)',
+        'border-strong': 'rgba(255,255,255,0.16)',
+        glow: '#3B6FF6',
       },
       fontFamily: {
         sans: ['Poppins', 'Inter', 'sans-serif'],
       },
       boxShadow: {
-        'neon': '0 0 20px rgba(127,37,211,0.3)',
-        'neon-strong': '0 0 30px rgba(127,37,211,0.5)',
-        'card': '0 4px 20px rgba(0,0,0,0.5)',
+        'neon': '0 0 20px rgba(59,111,246,0.25)',
+        'neon-strong': '0 0 30px rgba(59,111,246,0.45)',
+        'card': '0 8px 28px rgba(0,0,0,0.55)',
       },
       animation: {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -32,8 +38,8 @@ export default {
       },
       keyframes: {
         glow: {
-          '0%': { boxShadow: '0 0 5px rgba(127,37,211,0.3)' },
-          '100%': { boxShadow: '0 0 20px rgba(127,37,211,0.6)' },
+          '0%': { boxShadow: '0 0 5px rgba(59,111,246,0.3)' },
+          '100%': { boxShadow: '0 0 20px rgba(59,111,246,0.6)' },
         }
       }
     },

@@ -1,53 +1,39 @@
 <template>
   <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-border">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <!-- Logo -->
-        <div class="flex items-center">
-          <router-link to="/" class="flex items-center space-x-2">
-            <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <span class="text-white font-bold text-xl">F</span>
-            </div>
-            <span class="text-white font-bold text-xl hidden sm:block">FOOTFY</span>
+    <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- ===== Desktop ===== -->
+      <div class="hidden md:flex items-center justify-between h-16">
+        <!-- Brand -->
+        <router-link to="/" class="flex items-center space-x-2 shrink-0">
+          <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-neon">
+            <span class="text-white font-extrabold text-lg">F</span>
+          </div>
+          <span class="text-white font-extrabold text-xl tracking-tight">FootMad</span>
+        </router-link>
+
+        <!-- Center nav -->
+        <div class="flex items-center space-x-1">
+          <router-link
+            v-for="link in navLinks"
+            :key="link.to"
+            :to="link.to"
+            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            :class="isActive(link)
+              ? 'text-white bg-card-hover'
+              : 'text-text-muted hover:text-white hover:bg-card'"
+          >
+            {{ link.label }}
           </router-link>
         </div>
 
-        <!-- Desktop Navigation -->
-        <div class="hidden md:flex items-center space-x-8">
-          <router-link 
-            to="/" 
-            class="text-text-muted hover:text-white transition-colors"
-            :class="{ 'text-primary': $route.path === '/' }"
-          >
-            Home
-          </router-link>
-          <a 
-            href="#live" 
-            class="text-text-muted hover:text-white transition-colors"
-          >
-            Live
-          </a>
-          <a 
-            href="#upcoming" 
-            class="text-text-muted hover:text-white transition-colors"
-          >
-            Upcoming
-          </a>
-          <router-link 
-            to="/category/all" 
-            class="text-text-muted hover:text-white transition-colors"
-          >
-            Sports
-          </router-link>
-        </div>
-
-        <!-- Desktop Right Side -->
-        <div class="hidden md:flex items-center space-x-4">
+        <!-- Right: search + telegram -->
+        <div class="flex items-center space-x-3 shrink-0">
           <div class="relative">
             <input
               type="text"
+              v-model="searchQuery"
               placeholder="Search matches..."
-              class="bg-card border border-border rounded-lg px-4 py-2 text-sm text-white placeholder-text-muted focus:outline-none focus:border-primary w-48"
+              class="bg-card border border-border rounded-lg pl-4 pr-9 py-2 text-sm text-white placeholder-text-muted focus:outline-none focus:border-primary w-52"
               @keyup.enter="handleSearch"
             />
             <svg class="w-4 h-4 absolute right-3 top-2.5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,8 +41,9 @@
             </svg>
           </div>
           <a
-            href="https://t.me/footfy"
+            href="https://t.me/footmad"
             target="_blank"
+            rel="noopener"
             class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
           >
             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -65,95 +52,95 @@
             <span>Telegram</span>
           </a>
         </div>
+      </div>
 
-        <!-- Mobile Menu Button -->
-        <button
-          @click="toggleMobileMenu"
-          class="md:hidden text-white p-2"
-        >
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <!-- ===== Mobile header: ☰ · FootMad · 🔍 ===== -->
+      <div class="md:hidden flex items-center justify-between h-14">
+        <button @click="toggleMobileMenu" class="text-white p-2 -ml-2" aria-label="Menu">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
+        <router-link to="/" class="text-white font-extrabold text-xl tracking-tight">FootMad</router-link>
+        <button @click="showMobileSearch = !showMobileSearch" class="text-white p-2 -mr-2" aria-label="Search">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Mobile search bar (toggles) -->
+      <div v-if="showMobileSearch" class="md:hidden pb-3">
+        <input
+          type="text"
+          v-model="searchQuery"
+          placeholder="Search matches..."
+          class="w-full bg-card border border-border rounded-lg px-4 py-2 text-sm text-white placeholder-text-muted focus:outline-none focus:border-primary"
+          @keyup.enter="handleSearch"
+        />
       </div>
     </div>
 
-    <!-- Mobile Menu -->
-    <div
-      v-if="mobileMenuOpen"
-      class="md:hidden glass-strong border-t border-border"
-    >
-      <div class="px-4 py-3 space-y-3">
+    <!-- Mobile slide-down menu -->
+    <div v-if="mobileMenuOpen" class="md:hidden glass-strong border-t border-border">
+      <div class="px-4 py-3 space-y-1">
         <router-link
-          to="/"
-          class="block text-text-muted hover:text-white transition-colors py-2"
+          v-for="link in navLinks"
+          :key="link.to"
+          :to="link.to"
+          class="block text-text-muted hover:text-white hover:bg-card transition-colors py-2.5 px-3 rounded-lg"
           @click="closeMobileMenu"
         >
-          Home
-        </router-link>
-        <a
-          href="#live"
-          class="block text-text-muted hover:text-white transition-colors py-2"
-          @click="closeMobileMenu"
-        >
-          Live
-        </a>
-        <a
-          href="#upcoming"
-          class="block text-text-muted hover:text-white transition-colors py-2"
-          @click="closeMobileMenu"
-        >
-          Upcoming
-        </a>
-        <router-link
-          to="/category/all"
-          class="block text-text-muted hover:text-white transition-colors py-2"
-          @click="closeMobileMenu"
-        >
-          Sports
+          {{ link.label }}
         </router-link>
         <router-link
           to="/favorites"
-          class="block text-text-muted hover:text-white transition-colors py-2"
+          class="block text-text-muted hover:text-white hover:bg-card transition-colors py-2.5 px-3 rounded-lg"
           @click="closeMobileMenu"
         >
           Favorites
         </router-link>
-        <div class="pt-3 border-t border-border">
-          <input
-            type="text"
-            placeholder="Search matches..."
-            class="w-full bg-card border border-border rounded-lg px-4 py-2 text-sm text-white placeholder-text-muted focus:outline-none focus:border-primary"
-            @keyup.enter="handleSearch"
-          />
-        </div>
       </div>
     </div>
   </nav>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useUIStore } from '@/stores/ui'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 
 const uiStore = useUIStore()
 const router = useRouter()
+const route = useRoute()
+
+const searchQuery = ref('')
+const showMobileSearch = ref(false)
+
+const navLinks = [
+  { label: 'Home', to: '/' },
+  { label: 'Live', to: '/?tab=live' },
+  { label: 'All Channels', to: '/channels' },
+  { label: 'All Sports', to: '/sports' },
+  { label: 'Leagues', to: '/leagues' },
+]
 
 const mobileMenuOpen = computed(() => uiStore.mobileMenuOpen)
 
-const toggleMobileMenu = () => {
-  uiStore.toggleMobileMenu()
+const isActive = (link) => {
+  if (link.to === '/') return route.path === '/' && !route.query.tab
+  if (link.to.startsWith('/?')) return route.path === '/' && route.query.tab === 'live'
+  return route.path.startsWith(link.to)
 }
 
-const closeMobileMenu = () => {
-  uiStore.closeMobileMenu()
-}
+const toggleMobileMenu = () => uiStore.toggleMobileMenu()
+const closeMobileMenu = () => uiStore.closeMobileMenu()
 
-const handleSearch = (e) => {
-  const query = e.target.value
+const handleSearch = () => {
+  const query = searchQuery.value.trim()
   if (query) {
     router.push(`/search?q=${encodeURIComponent(query)}`)
+    showMobileSearch.value = false
     closeMobileMenu()
   }
 }

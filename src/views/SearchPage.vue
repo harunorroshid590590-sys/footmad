@@ -29,7 +29,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <MatchCard
               v-for="match in filteredMatches"
-              :key="match._id"
+              :key="match.id"
               :match="match"
             />
           </div>
@@ -61,6 +61,7 @@ import { useRoute } from 'vue-router'
 import { useMatchesStore } from '@/stores/matches'
 import MatchCard from '@/components/MatchCard.vue'
 
+const route = useRoute()
 const matchesStore = useMatchesStore()
 const searchQuery = ref('')
 const debouncedQuery = ref('')
@@ -77,16 +78,31 @@ watch(searchQuery, (newQuery) => {
   debounceSearch(newQuery)
 })
 
+// Keep the input in sync with the ?q= URL param (e.g. from the navbar search).
+watch(() => route.query.q, (q) => {
+  if (typeof q === 'string' && q !== searchQuery.value) {
+    searchQuery.value = q
+    debouncedQuery.value = q
+  }
+}, { immediate: true })
+
 const filteredMatches = computed(() => {
-  if (!debouncedQuery.value) return []
-  
-  const query = debouncedQuery.value.toLowerCase()
+  const query = debouncedQuery.value.trim().toLowerCase()
+  if (!query) return []
+
+  // Support "Team A vs Team B" style queries by also matching all parts.
+  const terms = query.split(/\s+vs?\s+/).map(t => t.trim()).filter(Boolean)
+
   return matchesStore.matches.filter(match => {
-    return (
-      match.homeTeam?.name?.toLowerCase().includes(query) ||
-      match.awayTeam?.name?.toLowerCase().includes(query) ||
-      match.league?.toLowerCase().includes(query)
-    )
+    const home = String(match.homeTeam?.name ?? match.homeTeam ?? '').toLowerCase()
+    const away = String(match.awayTeam?.name ?? match.awayTeam ?? '').toLowerCase()
+    const event = String(match.eventName ?? match.league ?? '').toLowerCase()
+    const category = String(match.category ?? '').toLowerCase()
+    const haystack = `${home} ${away} ${event} ${category}`
+
+    if (haystack.includes(query)) return true
+    if (terms.length > 1) return terms.every(term => haystack.includes(term))
+    return false
   })
 })
 
@@ -95,6 +111,6 @@ const handleSearch = () => {
 }
 
 onMounted(() => {
-  matchesStore.fetchMatches()
+  if (matchesStore.matches.length === 0) matchesStore.fetchMatches()
 })
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-background pb-20 md:pb-0">
     <div class="max-w-7xl mx-auto px-4 py-6">
-      <h1 class="text-2xl font-bold text-white mb-6 capitalize">{{ category }} Matches</h1>
+      <h1 class="text-2xl font-bold text-white mb-6 capitalize">{{ displayName }} Matches</h1>
       
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center py-20">
@@ -53,13 +53,16 @@ const matches = computed(() => matchesStore.matches)
 
 const category = computed(() => route.params.category || 'All')
 
+const displayName = computed(() => category.value.replace(/-/g, ' '))
+
+const slugify = (s) => String(s || '').toLowerCase().replace(/[\s_]+/g, '-')
+
 const filteredMatches = computed(() => {
-  if (category.value === 'all' || category.value === 'All') {
+  const slug = slugify(category.value)
+  if (slug === 'all') {
     return matches.value
   }
-  return matches.value.filter(match => 
-    match.category?.toLowerCase() === category.value.toLowerCase()
-  )
+  return matches.value.filter(match => slugify(match.category) === slug)
 })
 
 const fetchMatches = () => {

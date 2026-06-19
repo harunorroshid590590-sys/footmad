@@ -17,6 +17,26 @@ const routes = [
     component: () => import('@/views/MatchPage.vue')
   },
   {
+    path: '/channels',
+    name: 'AllChannels',
+    component: () => import('@/views/AllChannels.vue')
+  },
+  {
+    path: '/channel/:id',
+    name: 'ChannelWatch',
+    component: () => import('@/views/ChannelWatch.vue')
+  },
+  {
+    path: '/sports',
+    name: 'AllSports',
+    component: () => import('@/views/AllSports.vue')
+  },
+  {
+    path: '/leagues',
+    name: 'Leagues',
+    component: () => import('@/views/Leagues.vue')
+  },
+  {
     path: '/category/:category',
     name: 'CategoryPage',
     component: () => import('@/views/CategoryPage.vue')

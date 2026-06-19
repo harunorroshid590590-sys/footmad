@@ -40,29 +40,33 @@
   
   .neon-border {
     @apply border border-border;
-    box-shadow: 0 0 15px rgba(127, 37, 211, 0.3);
+    box-shadow: 0 0 15px rgba(59, 111, 246, 0.25);
   }
-  
+
   .neon-border-hover {
     @apply border border-border transition-all duration-300;
-    box-shadow: 0 0 15px rgba(127, 37, 211, 0.3);
+    box-shadow: 0 0 15px rgba(59, 111, 246, 0.25);
   }
-  
+
   .neon-border-hover:hover {
-    box-shadow: 0 0 25px rgba(127, 37, 211, 0.6);
-    border-color: #7F25D3;
+    box-shadow: 0 0 25px rgba(59, 111, 246, 0.5);
+    border-color: #3B6FF6;
   }
-  
+
   .card-hover {
     @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-neon;
   }
-  
+
   .live-badge {
-    @apply bg-red-600 text-white text-xs font-bold px-2 py-1 rounded;
+    @apply bg-accent text-white text-xs font-bold px-2 py-1 rounded;
     animation: pulse 2s infinite;
   }
-  
+
   .glow-text {
-    text-shadow: 0 0 10px rgba(127, 37, 211, 0.8);
+    text-shadow: 0 0 10px rgba(59, 111, 246, 0.7);
   }
+
+  /* Hide scrollbars on horizontal scrollers (tabs, category rows) */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 }

@@ -8,7 +8,7 @@
             <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
               <span class="text-white font-bold text-xl">F</span>
             </div>
-            <span class="text-white font-bold text-xl">FOOTFY</span>
+            <span class="text-white font-bold text-xl">FootMad</span>
           </div>
 
           <nav class="space-y-2">
@@ -47,7 +47,7 @@
               <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <span class="text-white font-bold">F</span>
               </div>
-              <span class="text-white font-bold">FOOTFY</span>
+              <span class="text-white font-bold">FootMad</span>
             </div>
             <button
               @click="mobileMenuOpen = !mobileMenuOpen"
@@ -136,6 +136,16 @@
             <StreamsTable @edit="editStream" @delete="deleteStream" />
           </div>
 
+          <!-- Channels Management -->
+          <div v-if="activeSection === 'channels'">
+            <ChannelsManager />
+          </div>
+
+          <!-- Match Banners -->
+          <div v-if="activeSection === 'banners'">
+            <MatchBanners />
+          </div>
+
           <!-- Categories -->
           <div v-if="activeSection === 'categories'">
             <h1 class="text-2xl font-bold text-white mb-6">Categories</h1>
@@ -195,6 +205,8 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import MatchesTable from '@/components/admin/MatchesTable.vue'
 import StreamsTable from '@/components/admin/StreamsTable.vue'
+import ChannelsManager from '@/components/admin/ChannelsManager.vue'
+import MatchBanners from '@/components/admin/MatchBanners.vue'
 import CategoriesTable from '@/components/admin/CategoriesTable.vue'
 import SettingsPanel from '@/components/admin/SettingsPanel.vue'
 import MatchModal from '@/components/admin/MatchModal.vue'
@@ -218,6 +230,8 @@ const sidebarItems = computed(() => [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
   { id: 'matches', label: 'Matches', icon: '⚽' },
   { id: 'streams', label: 'Streams', icon: '📺' },
+  { id: 'channels', label: 'Channels', icon: '📡' },
+  { id: 'banners', label: 'Match Banners', icon: '🖼️' },
   { id: 'categories', label: 'Categories', icon: '🏷️' },
   { id: 'ads', label: 'Ads Manager', icon: '📢' },
   { id: 'ad-config', label: 'Ad Config', icon: '⚙️' },
