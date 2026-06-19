@@ -31,7 +31,7 @@
         <!-- Main -->
         <div class="lg:col-span-3 space-y-4">
           <!-- Player -->
-          <div class="relative bg-black rounded-2xl overflow-hidden shadow-card">
+          <div tabindex="0" data-focus-default class="relative bg-black rounded-2xl overflow-hidden shadow-card outline-none">
             <VideoPlayer
               v-if="currentStream"
               :key="`${match.id}-${currentServerIndex}`"

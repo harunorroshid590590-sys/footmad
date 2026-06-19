@@ -70,3 +70,41 @@
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 }
+
+/* ===== Keyboard accessibility focus ring (all devices) ===== */
+:focus-visible {
+  outline: 2px solid #3B6FF6;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* ===== TV / D-pad mode (html.tv) ===== */
+html.tv :focus {
+  outline: 3px solid #3B6FF6 !important;
+  outline-offset: 3px;
+  border-radius: 10px;
+  box-shadow: 0 0 0 5px rgba(59, 111, 246, 0.35);
+  transform: scale(1.04);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  position: relative;
+  z-index: 5;
+}
+
+/* Don't scale text fields / large containers — just ring them */
+html.tv input:focus,
+html.tv textarea:focus,
+html.tv select:focus,
+html.tv video:focus {
+  transform: none;
+}
+
+/* Overscan-safe spacing so focus rings near edges aren't cropped by the TV */
+html.tv body { font-size: 1.05rem; }
+html.tv main {
+  padding-left: 3vw;
+  padding-right: 3vw;
+  padding-bottom: 4vh;
+}
+
+/* Smooth scrolling as focus moves between rows */
+html.tv { scroll-behavior: smooth; }
