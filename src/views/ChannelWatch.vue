@@ -22,14 +22,15 @@
             :stream="currentServer"
             :is-live="true"
             @error="handlePlayerError"
-            @ready="playerError = false"
+            @ready="handlePlayerReady"
           />
           <div v-else class="aspect-video flex items-center justify-center text-text-muted">
             No streams available for this channel.
           </div>
 
           <PlayerOverlay
-            v-if="playerError"
+            v-if="playerError || retrying"
+            :state="playerError ? 'error' : 'connecting'"
             :message="errorMessage"
             :server-name="currentServer?.title"
             :has-next="false"
@@ -94,6 +95,9 @@ const error = ref(null)
 const playerError = ref(false)
 const errorMessage = ref('')
 const reloadKey = ref(0)
+const retrying = ref(false)
+const retryAttempts = ref(0)
+const MAX_RETRIES = 2
 const currentIndex = ref(0)
 const logoErr = ref(false)
 
@@ -105,6 +109,8 @@ const loadChannel = async () => {
   loading.value = true
   error.value = null
   playerError.value = false
+  retrying.value = false
+  retryAttempts.value = 0
   currentIndex.value = 0
   try {
     const { data } = await axios.get(`${API_URL}/channels/${route.params.id}`)
@@ -120,29 +126,54 @@ const loadChannel = async () => {
 const selectServer = (index) => {
   currentIndex.value = index
   playerError.value = false
+  retrying.value = false
+  retryAttempts.value = 0
 }
 
 const tryNextServer = () => {
   if (currentIndex.value < servers.value.length - 1) {
     currentIndex.value += 1
     playerError.value = false
+    retryAttempts.value = 0
   }
 }
 
 const retryCurrent = () => {
   playerError.value = false
+  retrying.value = true
+  retryAttempts.value = 0
   reloadKey.value += 1
 }
 
 const handlePlayerError = (issue) => {
   const detail = issue?.details || issue?.message || ''
-  // Silently fail over; only show the error once all servers are exhausted.
-  if (currentIndex.value < servers.value.length - 1) {
+  const isLast = currentIndex.value >= servers.value.length - 1
+
+  // Other servers available → fail over quickly.
+  if (!isLast) {
+    retrying.value = true
     tryNextServer()
     return
   }
+
+  // Last/only server → retry transient errors a couple of times before failing.
+  if (retryAttempts.value < MAX_RETRIES) {
+    retryAttempts.value += 1
+    retrying.value = true
+    playerError.value = false
+    window.setTimeout(() => { reloadKey.value += 1 }, 1500)
+    return
+  }
+
+  retrying.value = false
   errorMessage.value = friendlyStreamError(detail)
   playerError.value = true
+}
+
+const handlePlayerReady = () => {
+  playerError.value = false
+  retrying.value = false
+  retryAttempts.value = 0
 }
 
 const shareChannel = async () => {

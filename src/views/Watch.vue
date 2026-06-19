@@ -41,7 +41,8 @@
               @ready="handlePlayerReady"
             />
             <PlayerOverlay
-              v-if="playerError"
+              v-if="playerError || retrying"
+              :state="playerError ? 'error' : 'connecting'"
               :message="errorMessage"
               :server-name="currentStream?.title"
               :has-next="false"
@@ -146,6 +147,9 @@ const error = ref(null)
 const playerError = ref(false)
 const errorMessage = ref('')
 const reloadKey = ref(0)
+const retrying = ref(false)
+const retryAttempts = ref(0)
+const MAX_RETRIES = 2 // silent retries on the last server before giving up
 const currentServerIndex = ref(0)
 const homeErr = ref(false)
 const awayErr = ref(false)
@@ -243,6 +247,8 @@ const loadMatch = async () => {
   loading.value = true
   error.value = null
   playerError.value = false
+  retrying.value = false
+  retryAttempts.value = 0
   currentServerIndex.value = 0
   homeErr.value = false
   awayErr.value = false
@@ -268,33 +274,55 @@ const loadMatch = async () => {
 const switchServer = (index) => {
   currentServerIndex.value = index
   playerError.value = false
+  retrying.value = false
+  retryAttempts.value = 0
 }
 
 const tryNextServer = () => {
   if (currentServerIndex.value < servers.value.length - 1) {
     currentServerIndex.value += 1
     playerError.value = false
+    retryAttempts.value = 0
   }
 }
 
 const retryCurrent = () => {
   playerError.value = false
+  retrying.value = true
+  retryAttempts.value = 0
   reloadKey.value += 1 // force the player to remount and reload the same server
 }
 
 const handlePlayerError = (playerIssue) => {
   const detail = playerIssue?.details || playerIssue?.message || playerIssue?.data?.message || ''
-  // Silently fail over to the next server; only surface an error once all are exhausted.
-  if (currentServerIndex.value < servers.value.length - 1) {
+  const isLast = currentServerIndex.value >= servers.value.length - 1
+
+  // Other servers available → fail over quickly.
+  if (!isLast) {
+    retrying.value = true
     tryNextServer()
     return
   }
+
+  // Last/only server → transient errors (e.g. live-stream startup, JW 102630)
+  // often recover, so silently retry a couple of times before showing an error.
+  if (retryAttempts.value < MAX_RETRIES) {
+    retryAttempts.value += 1
+    retrying.value = true
+    playerError.value = false
+    window.setTimeout(() => { reloadKey.value += 1 }, 1500)
+    return
+  }
+
+  retrying.value = false
   errorMessage.value = friendlyStreamError(detail)
   playerError.value = true
 }
 
 const handlePlayerReady = () => {
   playerError.value = false
+  retrying.value = false
+  retryAttempts.value = 0
 }
 
 const shareMatch = async () => {
