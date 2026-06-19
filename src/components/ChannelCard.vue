@@ -36,17 +36,17 @@
     </div>
   </router-link>
 
-  <!-- Circular tile variant (home section tabs) -->
+  <!-- Bordered card with circular logo + name (mobile channels / section tabs) -->
   <router-link
     v-else
     :to="to"
-    class="group flex flex-col items-center gap-2 text-center"
+    class="group flex flex-col items-center gap-2 text-center rounded-xl bg-card border border-[#2c2747] p-3 hover:border-primary/60 transition-colors"
   >
-    <div class="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-card border-2 border-[#39415a] flex items-center justify-center group-hover:border-primary transition-colors">
+    <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full overflow-hidden bg-white/95 flex items-center justify-center">
       <img v-if="logoUrl && !logoErr" :src="logoUrl" :alt="channel.name" loading="lazy" class="w-full h-full object-cover" @error="logoErr = true" />
-      <span v-else class="text-base font-bold text-text-muted">{{ initials }}</span>
+      <span v-else class="text-base font-bold text-slate-600">{{ initials }}</span>
     </div>
-    <span class="text-[11px] sm:text-xs text-text-muted group-hover:text-white transition-colors truncate w-full px-0.5">{{ channel.name }}</span>
+    <span class="text-[11px] sm:text-xs text-white truncate w-full px-0.5">{{ channel.name }}</span>
   </router-link>
 </template>
 
