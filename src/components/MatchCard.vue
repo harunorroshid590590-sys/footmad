@@ -109,7 +109,7 @@ const isUpcoming = computed(() => {
   if (!props.match.startTime) return false
   return new Date(props.match.startTime) > new Date()
 })
-const isPinned = computed(() => props.match.isPinned === true || props.match.isHot === true)
+const isPinned = computed(() => props.match.isPinned === true)
 
 const statusLabel = computed(() => {
   if (isLive.value) return 'LIVE'

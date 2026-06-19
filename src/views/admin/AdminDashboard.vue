@@ -231,7 +231,7 @@ const sidebarItems = computed(() => [
   { id: 'matches', label: 'Matches', icon: '⚽' },
   { id: 'streams', label: 'Streams', icon: '📺' },
   { id: 'channels', label: 'Channels', icon: '📡' },
-  { id: 'banners', label: 'Match Banners', icon: '🖼️' },
+  { id: 'banners', label: 'Matches (Pin/Banner)', icon: '📌' },
   { id: 'categories', label: 'Categories', icon: '🏷️' },
   { id: 'ads', label: 'Ads Manager', icon: '📢' },
   { id: 'ad-config', label: 'Ad Config', icon: '⚙️' },

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
-      <h1 class="text-2xl font-bold text-white">Match Banners</h1>
+      <h1 class="text-2xl font-bold text-white">Matches</h1>
       <input
         v-model="search"
         type="text"
@@ -10,7 +10,7 @@
       />
     </div>
     <p class="text-text-muted text-sm mb-6">
-      Upload a designed poster to override the auto-generated card. Leave empty to use the generated poster.
+      Pin a match to feature it at the top with a PINNED badge. Upload a poster to override the auto-generated card.
     </p>
 
     <div v-if="loading" class="text-text-muted py-10 text-center">Loading matches...</div>
@@ -35,18 +35,29 @@
         <div class="min-w-0 flex-1">
           <h3 class="text-white font-semibold truncate">{{ m.homeTeam }} vs {{ m.awayTeam }}</h3>
           <p class="text-text-muted text-xs truncate">{{ m.eventName || m.category }}</p>
-          <p class="mt-1">
+          <p class="mt-1 flex items-center gap-1.5">
             <span
               class="text-[10px] font-semibold px-2 py-0.5 rounded-full"
               :class="m.banner ? 'bg-primary/20 text-primary-light' : 'bg-surface text-text-muted'"
             >
               {{ m.banner ? 'Custom banner' : 'Generated' }}
             </span>
+            <span v-if="m.isPinned" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400">🔥 PINNED</span>
           </p>
         </div>
 
         <!-- Actions -->
         <div class="flex flex-col gap-2 shrink-0">
+          <button
+            @click="togglePin(m)"
+            :disabled="busyId === m.id"
+            class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+            :class="m.isPinned
+              ? 'bg-amber-500/20 border border-amber-500/40 text-amber-400'
+              : 'border border-border text-text-muted hover:text-white'"
+          >
+            {{ m.isPinned ? '🔥 Pinned' : 'Pin' }}
+          </button>
           <input :ref="el => setFileRef(m.id, el)" type="file" accept="image/*" class="hidden" @change="(e) => onFile(m, e)" />
           <button
             @click="triggerUpload(m.id)"
@@ -90,9 +101,14 @@ const bannerUrl = (m) => resolveAsset(m.banner)
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase()
   if (!q) return matches.value
-  return matches.value.filter((m) =>
-    `${m.homeTeam} ${m.awayTeam} ${m.eventName || ''}`.toLowerCase().includes(q)
-  )
+  // Support "Team A vs Team B" queries by matching all parts.
+  const terms = q.split(/\s+vs?\s+/).map(t => t.trim()).filter(Boolean)
+  return matches.value.filter((m) => {
+    const hay = `${m.homeTeam} ${m.awayTeam} ${m.eventName || ''} ${m.category || ''}`.toLowerCase()
+    if (hay.includes(q)) return true
+    if (terms.length > 1) return terms.every(term => hay.includes(term))
+    return false
+  })
 })
 
 const fetchMatches = async () => {
@@ -131,8 +147,22 @@ const revert = async (m) => {
   try {
     await api.delete(`/admin/overrides/${m.id}`)
     m.banner = ''
+    m.isPinned = false
   } catch (err) {
     alert(err.response?.data?.message || 'Failed to revert')
+  } finally {
+    busyId.value = null
+  }
+}
+
+const togglePin = async (m) => {
+  busyId.value = m.id
+  try {
+    const next = !m.isPinned
+    await api.post('/admin/overrides', { matchId: String(m.id), pinned: next })
+    m.isPinned = next
+  } catch (err) {
+    alert(err.response?.data?.message || 'Failed to update pin')
   } finally {
     busyId.value = null
   }
