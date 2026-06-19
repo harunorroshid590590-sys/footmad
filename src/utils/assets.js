@@ -9,6 +9,12 @@ export const API_ORIGIN = API_URL.replace(/\/api\/?$/, '')
 export const resolveAsset = (url) => {
   if (!url) return ''
   const value = String(url).trim()
-  if (/^(https?:)?\/\//i.test(value) || value.startsWith('data:')) return value
+  if (value.startsWith('data:')) return value
+  // Protocol-relative → https
+  if (value.startsWith('//')) return `https:${value}`
+  // Upgrade http → https to avoid mixed-content blocking on an https site.
+  if (/^http:\/\//i.test(value)) return value.replace(/^http:\/\//i, 'https://')
+  if (/^https:\/\//i.test(value)) return value
+  // Relative path served by the backend (e.g. /uploads/..)
   return `${API_ORIGIN}${value.startsWith('/') ? '' : '/'}${value}`
 }
