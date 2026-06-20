@@ -50,22 +50,8 @@
             />
           </div>
 
-          <!-- Server tabs -->
-          <div v-if="servers.length" class="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
-            <button
-              v-for="(server, index) in servers"
-              :key="`${server.title}-${index}`"
-              @click="switchServer(index)"
-              class="flex items-center gap-2 shrink-0 px-4 py-2 rounded-lg border text-sm font-medium transition-colors"
-              :class="currentServerIndex === index
-                ? 'bg-card border-primary text-white'
-                : 'bg-card border-border text-text-muted hover:text-white hover:border-primary/40'"
-            >
-              <svg v-if="currentServerIndex === index" class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-              <span class="truncate max-w-[160px]">{{ server.title || `Server ${index + 1}` }}</span>
-              <span class="text-[10px] uppercase opacity-70">{{ server.type }}</span>
-            </button>
-          </div>
+          <!-- Server tabs (TV-remote navigable: ←/→ to move, OK to switch) -->
+          <ServerTabs :servers="servers" :current="currentServerIndex" @select="switchServer" />
 
           <!-- Match header: flags VS + share -->
           <div class="bg-card border border-border rounded-2xl p-4">
@@ -132,6 +118,7 @@ import { useRoute } from 'vue-router'
 import axios from 'axios'
 import VideoPlayer from '@/components/VideoPlayer.vue'
 import PlayerOverlay from '@/components/PlayerOverlay.vue'
+import ServerTabs from '@/components/ServerTabs.vue'
 import MatchCard from '@/components/MatchCard.vue'
 import { useMatchesStore } from '@/stores/matches'
 import { resolveAsset } from '@/utils/assets'

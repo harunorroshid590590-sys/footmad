@@ -39,20 +39,8 @@
         </div>
 
         <!-- Server tabs -->
-        <div v-if="servers.length" class="flex items-center gap-2 overflow-x-auto scrollbar-hide mt-4 pb-1">
-          <button
-            v-for="(server, index) in servers"
-            :key="server.id"
-            @click="selectServer(index)"
-            class="flex items-center gap-2 shrink-0 px-4 py-2 rounded-lg border text-sm font-medium transition-colors"
-            :class="index === currentIndex
-              ? 'bg-card border-primary text-white'
-              : 'bg-card border-border text-text-muted hover:text-white hover:border-primary/40'"
-          >
-            <svg v-if="index === currentIndex" class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-            <span class="truncate max-w-[160px]">{{ server.title }}</span>
-            <span class="text-[10px] uppercase opacity-70">{{ server.quality }}</span>
-          </button>
+        <div class="mt-4">
+          <ServerTabs :servers="servers" :current="currentIndex" @select="selectServer" />
         </div>
 
         <!-- Channel header -->
@@ -82,6 +70,7 @@ import { useRoute } from 'vue-router'
 import axios from 'axios'
 import VideoPlayer from '@/components/VideoPlayer.vue'
 import PlayerOverlay from '@/components/PlayerOverlay.vue'
+import ServerTabs from '@/components/ServerTabs.vue'
 import { normalizeServers } from '@/utils/stream'
 import { resolveAsset } from '@/utils/assets'
 import { friendlyStreamError } from '@/utils/playerError'
