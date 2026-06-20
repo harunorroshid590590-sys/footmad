@@ -1,5 +1,32 @@
 <template>
   <div class="space-y-6">
+    <!-- Toast notification -->
+    <Transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="translate-y-2 opacity-0"
+      enter-to-class="translate-y-0 opacity-100"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="translate-y-0 opacity-100"
+      leave-to-class="translate-y-2 opacity-0"
+    >
+      <div
+        v-if="toast.show"
+        class="fixed top-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl border shadow-card max-w-sm"
+        :class="toast.type === 'error'
+          ? 'bg-card border-accent/40 text-white'
+          : 'bg-card border-green-500/40 text-white'"
+      >
+        <span
+          class="flex items-center justify-center w-7 h-7 rounded-full shrink-0"
+          :class="toast.type === 'error' ? 'bg-accent/20 text-accent' : 'bg-green-500/20 text-green-400'"
+        >
+          <svg v-if="toast.type === 'error'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+        </span>
+        <p class="text-sm font-medium">{{ toast.message }}</p>
+      </div>
+    </Transition>
+
     <div class="flex items-center justify-between">
       <h2 class="text-2xl font-bold text-white">Ad Configuration</h2>
       <button
@@ -416,6 +443,14 @@ const config = ref({
 const uploadingBanner = ref(false)
 const bannerPreview = computed(() => resolveAsset(config.value.watchBanner?.image))
 
+const toast = ref({ show: false, message: '', type: 'success' })
+let toastTimer = null
+const showToast = (message, type = 'success') => {
+  toast.value = { show: true, message, type }
+  if (toastTimer) clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { toast.value.show = false }, 3000)
+}
+
 const fetchConfig = async () => {
   try {
     const response = await axios.get(`${API_URL}/ad-config`)
@@ -445,7 +480,7 @@ const uploadBanner = async (e) => {
     })
     config.value.watchBanner.image = data.url
   } catch (err) {
-    alert('Upload failed')
+    showToast('Image upload failed', 'error')
   } finally {
     uploadingBanner.value = false
     e.target.value = ''
@@ -458,10 +493,10 @@ const saveConfig = async () => {
     await axios.put(`${API_URL}/ad-config`, config.value, {
       headers: { Authorization: `Bearer ${token}` }
     })
-    alert('Ad configuration saved successfully')
+    showToast('Ad configuration saved successfully')
   } catch (error) {
     console.error('Error saving ad config:', error)
-    alert('Failed to save ad configuration')
+    showToast('Failed to save ad configuration', 'error')
   }
 }
 
