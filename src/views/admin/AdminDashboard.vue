@@ -22,6 +22,16 @@
               <component :is="item.icon" class="w-5 h-5" />
               <span>{{ item.label }}</span>
             </button>
+
+            <router-link
+              to="/"
+              class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-text-muted hover:text-white hover:bg-card-hover transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10" />
+              </svg>
+              <span>Back to Home</span>
+            </router-link>
           </nav>
         </div>
 
@@ -71,6 +81,15 @@
               <component :is="item.icon" class="w-5 h-5" />
               <span>{{ item.label }}</span>
             </button>
+            <router-link
+              to="/"
+              class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-text-muted hover:text-white hover:bg-card-hover transition-colors"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10" />
+              </svg>
+              <span>Back to Home</span>
+            </router-link>
             <button
               @click="handleLogout"
               class="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-text-muted hover:text-white hover:bg-card-hover transition-colors"

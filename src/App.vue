@@ -1,10 +1,10 @@
 <template>
   <div id="app" class="min-h-screen bg-background">
-    <Navbar />
+    <Navbar v-if="showSidebar" />
     <AppSidebar v-if="showSidebar" />
     <main
-      class="pt-14 pb-20 md:pb-8 transition-[padding]"
-      :class="showSidebar ? 'md:pl-[72px]' : ''"
+      class="transition-[padding]"
+      :class="showSidebar ? 'pt-14 pb-20 md:pb-8 md:pl-[72px]' : ''"
     >
       <router-view />
     </main>
