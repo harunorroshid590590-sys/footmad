@@ -1,29 +1,28 @@
 <template>
-  <!-- Mobile-only horizontal sports scroller (desktop uses the left sidebar) -->
-  <div class="md:hidden flex items-center gap-2 overflow-x-auto scrollbar-hide pb-2 -mt-1">
-    <router-link
+  <!-- Mobile-only sports filter row (desktop uses the left sidebar). Material Design icons. -->
+  <div class="md:hidden flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+    <button
       v-for="sport in sports"
       :key="sport.slug"
-      :to="`/category/${sport.slug}`"
-      class="flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-full bg-card border border-border text-text-muted text-sm whitespace-nowrap hover:text-white hover:border-primary/50 transition-colors"
+      @click="$emit('select', sport.slug)"
+      class="shrink-0 flex items-center justify-center rounded-xl transition-colors"
+      :class="modelValue === sport.slug
+        ? 'bg-white text-black gap-2 px-3 h-11 font-semibold'
+        : 'bg-card text-text-muted w-11 h-11 hover:text-white'"
     >
-      <span>{{ sport.icon }}</span>
-      <span>{{ sport.name }}</span>
-    </router-link>
+      <span v-html="sport.icon" class="inline-flex [&>svg]:w-5 [&>svg]:h-5"></span>
+      <span v-if="modelValue === sport.slug" class="text-sm whitespace-nowrap">{{ sport.name }}</span>
+    </button>
   </div>
 </template>
 
 <script setup>
-const sports = [
-  { name: 'Football', slug: 'football', icon: '⚽' },
-  { name: 'Cricket', slug: 'cricket', icon: '🏏' },
-  { name: 'Basketball', slug: 'nba', icon: '🏀' },
-  { name: 'Tennis', slug: 'tennis', icon: '🎾' },
-  { name: 'Boxing', slug: 'boxing', icon: '🥊' },
-  { name: 'UFC', slug: 'ufc', icon: '🤼' },
-  { name: 'Baseball', slug: 'mlb', icon: '⚾' },
-  { name: 'Formula 1', slug: 'formula-1', icon: '🏎️' },
-  { name: 'MotoGP', slug: 'motogp', icon: '🏍️' },
-  { name: 'Hockey', slug: 'nhl', icon: '🏒' },
-]
+import { SPORTS, ALL_ICON } from '@/data/sports'
+
+defineProps({
+  modelValue: { type: String, default: 'all' },
+})
+defineEmits(['select'])
+
+const sports = [{ name: 'All', slug: 'all', icon: ALL_ICON }, ...SPORTS]
 </script>

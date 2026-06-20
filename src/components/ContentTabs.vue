@@ -9,7 +9,7 @@
         ? 'bg-white text-black'
         : 'bg-card text-text-muted hover:text-white hover:bg-card-hover'"
     >
-      {{ tab.label }}
+      {{ tab.label }}<span v-if="counts" class="opacity-70"> ({{ counts[tab.key] ?? 0 }})</span>
     </button>
   </div>
 </template>
@@ -17,6 +17,7 @@
 <script setup>
 defineProps({
   active: { type: String, default: 'all' },
+  counts: { type: Object, default: null }, // { all, live, upcoming, ended }
 })
 defineEmits(['change'])
 

@@ -29,9 +29,10 @@
         :title="sport.name"
       >
         <span
-          class="w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-colors"
-          :class="isActiveSport(sport) ? 'bg-primary/20 ring-1 ring-primary/40' : 'bg-card group-hover:bg-card-hover'"
-        >{{ sport.icon }}</span>
+          class="w-10 h-10 rounded-xl flex items-center justify-center transition-colors [&>svg]:w-5 [&>svg]:h-5"
+          :class="isActiveSport(sport) ? 'bg-primary/20 ring-1 ring-primary/40 text-primary-light' : 'bg-card group-hover:bg-card-hover'"
+          v-html="sport.icon"
+        ></span>
         <span class="text-[10px] leading-tight text-center px-0.5 truncate w-full">{{ sport.short }}</span>
       </router-link>
     </nav>
@@ -44,18 +45,8 @@ import { useRoute, useRouter } from 'vue-router'
 const route = useRoute()
 const router = useRouter()
 
-const sports = [
-  { name: 'Football', short: 'Football', slug: 'football', icon: '⚽' },
-  { name: 'Cricket', short: 'Cricket', slug: 'cricket', icon: '🏏' },
-  { name: 'Basketball', short: 'Basket', slug: 'nba', icon: '🏀' },
-  { name: 'Tennis', short: 'Tennis', slug: 'tennis', icon: '🎾' },
-  { name: 'Boxing', short: 'Boxing', slug: 'boxing', icon: '🥊' },
-  { name: 'UFC', short: 'UFC', slug: 'ufc', icon: '🤼' },
-  { name: 'Baseball', short: 'MLB', slug: 'mlb', icon: '⚾' },
-  { name: 'Formula 1', short: 'F1', slug: 'formula-1', icon: '🏎️' },
-  { name: 'MotoGP', short: 'Moto', slug: 'motogp', icon: '🏍️' },
-  { name: 'Hockey', short: 'Hockey', slug: 'nhl', icon: '🏒' },
-]
+import { SPORTS } from '@/data/sports'
+const sports = SPORTS
 
 const actions = [
   {

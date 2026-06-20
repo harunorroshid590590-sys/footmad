@@ -5,10 +5,10 @@
     <div class="max-w-screen-2xl mx-auto px-3 sm:px-4 pt-0 pb-2">
       <AdRenderer />
 
-      <ContentTabs :active="activeTab" @change="setTab" />
+      <!-- Mobile-only sports filter (desktop has the sidebar) -->
+      <MobileSportsBar :model-value="selectedSport" @select="selectedSport = $event" />
 
-      <!-- Mobile-only sports scroller (desktop has the sidebar) -->
-      <MobileSportsBar />
+      <ContentTabs :active="activeTab" :counts="counts" @change="setTab" />
 
       <!-- Loading -->
       <div v-if="matchesStore.loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
@@ -54,9 +54,26 @@ const matchesStore = useMatchesStore()
 
 const validTabs = ['all', 'live', 'upcoming', 'ended']
 const activeTab = ref(validTabs.includes(route.query.tab) ? route.query.tab : 'all')
+const selectedSport = ref('all')
+
+const slugify = (str) => String(str || '').toLowerCase().replace(/[\s_]+/g, '-')
+
+// Matches filtered by the selected sport (category).
+const sportMatches = computed(() => {
+  if (selectedSport.value === 'all') return matchesStore.matches
+  return matchesStore.matches.filter((m) => slugify(m.category) === selectedSport.value)
+})
+
+// Status counts for the current sport (shown on the tabs).
+const counts = computed(() => ({
+  all: sportMatches.value.length,
+  live: filterByTab(sportMatches.value, 'live').length,
+  upcoming: filterByTab(sportMatches.value, 'upcoming').length,
+  ended: filterByTab(sportMatches.value, 'ended').length,
+}))
 
 const matchesToShow = computed(() =>
-  sortByPriority(filterByTab(matchesStore.matches, activeTab.value))
+  sortByPriority(filterByTab(sportMatches.value, activeTab.value))
 )
 
 const emptyLabel = computed(() => emptyLabelFor(activeTab.value))
