@@ -94,6 +94,41 @@
       </div>
     </div>
 
+    <!-- Pre-roll Video Ad (VAST) -->
+    <div class="bg-card rounded-xl border border-border p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-white">Video Ad (Pre-roll)</h3>
+          <p class="text-text-muted text-sm">VAST tag played before the stream starts. Plays again each time a match is opened.</p>
+        </div>
+        <input
+          v-model="config.videoAd.enabled"
+          type="checkbox"
+          class="w-5 h-5 rounded border-border bg-card-hover text-primary focus:ring-primary"
+        />
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-text-muted text-sm mb-2">VAST Tag URL</label>
+          <input
+            v-model="config.videoAd.vastUrl"
+            type="text"
+            placeholder="https://www.videosprofitnetwork.com/watch.xml?key=..."
+            class="w-full bg-card-hover border border-border rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="block text-text-muted text-sm mb-2">Skip allowed after (seconds, 0 = no skip)</label>
+          <input
+            v-model.number="config.videoAd.skipAfter"
+            type="number"
+            min="0"
+            class="w-32 bg-card-hover border border-border rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none"
+          />
+        </div>
+      </div>
+    </div>
+
     <!-- Banner Ads -->
     <div class="bg-card rounded-xl border border-border p-6">
       <h3 class="text-lg font-semibold text-white mb-4">Banner Ads</h3>
@@ -370,6 +405,11 @@ const config = ref({
     enabled: false,
     image: '',
     link: ''
+  },
+  videoAd: {
+    enabled: false,
+    vastUrl: '',
+    skipAfter: 5
   }
 })
 
@@ -380,9 +420,12 @@ const fetchConfig = async () => {
   try {
     const response = await axios.get(`${API_URL}/ad-config`)
     config.value = response.data
-    // Ensure watchBanner exists for older configs
+    // Ensure newer sections exist for older configs
     if (!config.value.watchBanner) {
       config.value.watchBanner = { enabled: false, image: '', link: '' }
+    }
+    if (!config.value.videoAd) {
+      config.value.videoAd = { enabled: false, vastUrl: '', skipAfter: 5 }
     }
   } catch (error) {
     console.error('Error fetching ad config:', error)

@@ -31,9 +31,14 @@
         <!-- Main -->
         <div class="lg:col-span-3 space-y-4">
           <!-- Player -->
-          <div tabindex="0" data-focus-default class="relative bg-black rounded-2xl overflow-hidden shadow-card outline-none">
+          <div
+            tabindex="0"
+            data-focus-default
+            class="relative bg-black rounded-2xl overflow-hidden shadow-card outline-none"
+            :class="showPreroll ? 'aspect-video' : ''"
+          >
             <VideoPlayer
-              v-if="currentStream"
+              v-if="currentStream && !showPreroll"
               :key="`${match.id}-${currentServerIndex}-${reloadKey}`"
               :stream="currentStream"
               :is-live="match.isLive"
@@ -41,13 +46,15 @@
               @ready="handlePlayerReady"
             />
             <PlayerOverlay
-              v-if="playerError || retrying"
+              v-if="!showPreroll && (playerError || retrying)"
               :state="playerError ? 'error' : 'connecting'"
               :message="errorMessage"
               :server-name="currentStream?.title"
               :has-next="false"
               @retry="retryCurrent"
             />
+            <!-- Pre-roll ad: plays before the stream, each time the match opens -->
+            <PrerollAd v-if="showPreroll" @complete="onPrerollDone" />
           </div>
 
           <!-- Server tabs (TV-remote navigable: ←/→ to move, OK to switch) -->
@@ -128,6 +135,7 @@ import { useRoute } from 'vue-router'
 import axios from 'axios'
 import VideoPlayer from '@/components/VideoPlayer.vue'
 import PlayerOverlay from '@/components/PlayerOverlay.vue'
+import PrerollAd from '@/components/PrerollAd.vue'
 import ServerTabs from '@/components/ServerTabs.vue'
 import MatchCard from '@/components/MatchCard.vue'
 import { useMatchesStore } from '@/stores/matches'
@@ -150,6 +158,9 @@ const MAX_RETRIES = 2 // silent retries on the last server before giving up
 const currentServerIndex = ref(0)
 const homeErr = ref(false)
 const awayErr = ref(false)
+const showPreroll = ref(false)
+
+const onPrerollDone = () => { showPreroll.value = false }
 
 const detectStreamType = (url = '', type = '') => {
   const normalizedUrl = String(url).toLowerCase()
@@ -250,6 +261,7 @@ const loadMatch = async () => {
   currentServerIndex.value = 0
   homeErr.value = false
   awayErr.value = false
+  showPreroll.value = false
 
   try {
     const response = await axios.get(`${API_URL}/matches/${matchId}`)
@@ -260,6 +272,8 @@ const loadMatch = async () => {
       return
     }
     match.value = normalizedMatch
+    // Play the pre-roll ad (if configured) before the stream starts.
+    if (normalizedMatch.servers?.length) showPreroll.value = true
   } catch (requestError) {
     match.value = null
     if (requestError.response?.status === 404) error.value = 'Match not found'
