@@ -3,7 +3,7 @@
     <Navbar />
     <AppSidebar v-if="showSidebar" />
     <main
-      class="pt-16 pb-20 md:pb-8 transition-[padding]"
+      class="pt-14 pb-20 md:pb-8 transition-[padding]"
       :class="showSidebar ? 'md:pl-[72px]' : ''"
     >
       <router-view />

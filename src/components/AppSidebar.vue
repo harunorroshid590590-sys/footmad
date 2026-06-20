@@ -1,6 +1,6 @@
 <template>
   <aside
-    class="hidden md:flex fixed left-0 top-16 bottom-0 z-40 w-[72px] flex-col items-center
+    class="hidden md:flex fixed left-0 top-14 bottom-0 z-40 w-[72px] flex-col items-center
            bg-surface border-r border-border py-4 overflow-y-auto scrollbar-hide"
   >
     <!-- Quick actions -->

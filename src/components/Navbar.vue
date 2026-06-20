@@ -2,7 +2,7 @@
   <nav class="fixed top-0 left-0 right-0 z-50 glass border-b border-border">
     <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- ===== Desktop ===== -->
-      <div class="hidden md:flex items-center justify-between h-16">
+      <div class="hidden md:flex items-center justify-between h-14">
         <!-- Brand -->
         <router-link to="/" class="flex items-center space-x-2 shrink-0">
           <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-neon">
