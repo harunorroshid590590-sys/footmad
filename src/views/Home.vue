@@ -7,6 +7,9 @@
 
       <ContentTabs :active="activeTab" @change="setTab" />
 
+      <!-- Mobile-only sports scroller (desktop has the sidebar) -->
+      <MobileSportsBar />
+
       <!-- Loading -->
       <div v-if="matchesStore.loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
         <MatchCardSkeleton v-for="i in 8" :key="i" />
@@ -39,6 +42,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useMatchesStore } from '@/stores/matches'
 import TickerStrip from '@/components/TickerStrip.vue'
 import ContentTabs from '@/components/ContentTabs.vue'
+import MobileSportsBar from '@/components/MobileSportsBar.vue'
 import MatchCard from '@/components/MatchCard.vue'
 import MatchCardSkeleton from '@/components/MatchCardSkeleton.vue'
 import AdRenderer from '@/components/AdRenderer.vue'
