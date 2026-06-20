@@ -6,26 +6,26 @@
     <div class="absolute -bottom-16 left-1/4 w-56 h-40 rounded-full bg-white/10 blur-3xl"></div>
 
     <div class="relative h-full flex flex-col items-center justify-between p-3 sm:p-4 text-white text-center">
-      <!-- Matchup title -->
-      <h3 class="font-extrabold leading-tight uppercase tracking-wide text-sm sm:text-lg drop-shadow-md line-clamp-2">
+      <!-- Matchup title (pushed below the badge row so long names never overlap the badges) -->
+      <h3 class="font-extrabold leading-tight uppercase tracking-wide text-sm sm:text-lg drop-shadow-md line-clamp-2 mt-6 sm:mt-7 px-1">
         {{ teamA }} <span class="opacity-80">vs</span> {{ teamB }}
       </h3>
 
       <!-- Flags + emblem -->
-      <div class="flex items-center justify-center gap-2.5 sm:gap-4 w-full">
-        <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-white/95 overflow-hidden flex items-center justify-center shadow-lg shrink-0">
-          <img v-if="homeLogo && !homeErr" :src="homeLogo" :alt="teamA" class="w-full h-full object-contain p-1" @error="homeErr = true" />
-          <span v-else class="text-xl sm:text-2xl">🏳️</span>
+      <div class="flex items-center justify-center gap-3 sm:gap-6 w-full">
+        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-white/95 overflow-hidden flex items-center justify-center shadow-lg shrink-0">
+          <img v-if="homeLogo && !homeErr" :src="homeLogo" :alt="teamA" class="w-full h-full object-contain p-2" @error="homeErr = true" />
+          <span v-else class="text-3xl sm:text-4xl">🏳️</span>
         </div>
 
         <div class="flex flex-col items-center shrink-0">
-          <img v-if="emblem && !emblemErr" :src="emblem" alt="" class="w-8 h-8 sm:w-11 sm:h-11 object-contain drop-shadow" @error="emblemErr = true" />
-          <span v-else class="text-xl sm:text-3xl">🏆</span>
+          <img v-if="emblem && !emblemErr" :src="emblem" alt="" class="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow" @error="emblemErr = true" />
+          <span v-else class="text-3xl sm:text-4xl">🏆</span>
         </div>
 
-        <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-white/95 overflow-hidden flex items-center justify-center shadow-lg shrink-0">
-          <img v-if="awayLogo && !awayErr" :src="awayLogo" :alt="teamB" class="w-full h-full object-contain p-1" @error="awayErr = true" />
-          <span v-else class="text-xl sm:text-2xl">🏳️</span>
+        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-white/95 overflow-hidden flex items-center justify-center shadow-lg shrink-0">
+          <img v-if="awayLogo && !awayErr" :src="awayLogo" :alt="teamB" class="w-full h-full object-contain p-2" @error="awayErr = true" />
+          <span v-else class="text-3xl sm:text-4xl">🏳️</span>
         </div>
       </div>
 
