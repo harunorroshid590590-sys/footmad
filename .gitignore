@@ -27,3 +27,6 @@ dist-ssr
 .env
 .env.local
 .env.*.local
+# Local production build config (e.g. VPS API URL) — kept out of git so it
+# never overrides the Vercel dashboard env var.
+.env.production
