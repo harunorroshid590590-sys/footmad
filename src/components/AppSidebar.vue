@@ -46,9 +46,9 @@ const router = useRouter()
 
 const sports = [
   { name: 'Football', short: 'Football', slug: 'football', icon: '⚽' },
+  { name: 'Cricket', short: 'Cricket', slug: 'cricket', icon: '🏏' },
   { name: 'Basketball', short: 'Basket', slug: 'nba', icon: '🏀' },
   { name: 'Tennis', short: 'Tennis', slug: 'tennis', icon: '🎾' },
-  { name: 'Cricket', short: 'Cricket', slug: 'cricket', icon: '🏏' },
   { name: 'Boxing', short: 'Boxing', slug: 'boxing', icon: '🥊' },
   { name: 'UFC', short: 'UFC', slug: 'ufc', icon: '🤼' },
   { name: 'Baseball', short: 'MLB', slug: 'mlb', icon: '⚾' },
