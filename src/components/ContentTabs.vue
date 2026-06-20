@@ -23,8 +23,7 @@ defineEmits(['change'])
 const tabs = [
   { key: 'all', label: 'All' },
   { key: 'live', label: 'Live' },
-  { key: 'news', label: 'News' },
-  { key: 'playlists', label: 'Playlists' },
-  { key: 'dawah', label: 'Dawah' },
+  { key: 'upcoming', label: 'Upcoming' },
+  { key: 'ended', label: 'Ended' },
 ]
 </script>

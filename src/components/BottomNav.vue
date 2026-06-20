@@ -33,15 +33,15 @@
         </span>
       </router-link>
 
-      <!-- Playlists -->
+      <!-- Upcoming -->
       <router-link
-        to="/?tab=playlists"
+        to="/?tab=upcoming"
         class="flex flex-col items-center justify-center transition-colors"
-        :class="isPlaylistsActive ? 'text-primary-light' : 'text-text-muted'"
-        aria-label="Playlists"
+        :class="isUpcomingActive ? 'text-primary-light' : 'text-text-muted'"
+        aria-label="Upcoming"
       >
         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h11M4 12h11M4 18h7M17 10v8a2 2 0 11-2-2h2z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
       </router-link>
     </div>
@@ -56,5 +56,5 @@ const route = useRoute()
 
 const isLiveActive = computed(() => route.path === '/' && route.query.tab === 'live')
 const isChannelsActive = computed(() => route.path.startsWith('/channels'))
-const isPlaylistsActive = computed(() => route.path === '/' && route.query.tab === 'playlists')
+const isUpcomingActive = computed(() => route.path === '/' && route.query.tab === 'upcoming')
 </script>

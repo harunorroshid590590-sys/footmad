@@ -7,50 +7,28 @@
 
       <ContentTabs :active="activeTab" @change="setTab" />
 
-      <!-- ===== Match tabs (All / Live) ===== -->
-      <template v-if="isMatchTab">
-        <!-- Loading -->
-        <div v-if="matchesStore.loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-          <MatchCardSkeleton v-for="i in 8" :key="i" />
-        </div>
+      <!-- Loading -->
+      <div v-if="matchesStore.loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+        <MatchCardSkeleton v-for="i in 8" :key="i" />
+      </div>
 
-        <!-- Error -->
-        <div v-else-if="matchesStore.error" class="text-center py-20">
-          <p class="text-text-muted mb-4">{{ matchesStore.error }}</p>
-          <button @click="matchesStore.fetchMatches()" class="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg transition-colors">
-            Retry
-          </button>
-        </div>
+      <!-- Error -->
+      <div v-else-if="matchesStore.error" class="text-center py-20">
+        <p class="text-text-muted mb-4">{{ matchesStore.error }}</p>
+        <button @click="matchesStore.fetchMatches()" class="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg transition-colors">
+          Retry
+        </button>
+      </div>
 
-        <!-- Empty -->
-        <div v-else-if="matchesToShow.length === 0" class="text-center py-20 text-text-muted">
-          <p>{{ activeTab === 'live' ? 'No live matches right now.' : 'No matches available.' }}</p>
-        </div>
+      <!-- Empty -->
+      <div v-else-if="matchesToShow.length === 0" class="text-center py-20 text-text-muted">
+        <p>{{ emptyLabel }}</p>
+      </div>
 
-        <!-- Grid -->
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
-          <MatchCard v-for="m in matchesToShow" :key="m.id" :match="m" />
-        </div>
-      </template>
-
-      <!-- ===== Section tabs (News / Playlists / Dawah) ===== -->
-      <template v-else>
-        <div v-if="channelsStore.loading" class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-4 pt-2">
-          <div v-for="i in 12" :key="i" class="flex flex-col items-center gap-2 animate-pulse">
-            <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-card-hover"></div>
-            <div class="h-3 w-12 bg-card-hover rounded"></div>
-          </div>
-        </div>
-
-        <div v-else-if="sectionItems.length === 0" class="text-center py-20 text-text-muted">
-          <p>No {{ activeTab }} yet.</p>
-          <p class="text-xs mt-1 opacity-70">Items added from the admin panel will appear here.</p>
-        </div>
-
-        <div v-else class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-4 pt-2">
-          <ChannelCard v-for="c in sectionItems" :key="c._id || c.id" :channel="c" />
-        </div>
-      </template>
+      <!-- Grid -->
+      <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+        <MatchCard v-for="m in matchesToShow" :key="m.id" :match="m" />
+      </div>
     </div>
   </div>
 </template>
@@ -59,59 +37,74 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMatchesStore } from '@/stores/matches'
-import { useChannelsStore } from '@/stores/channels'
 import TickerStrip from '@/components/TickerStrip.vue'
 import ContentTabs from '@/components/ContentTabs.vue'
 import MatchCard from '@/components/MatchCard.vue'
 import MatchCardSkeleton from '@/components/MatchCardSkeleton.vue'
-import ChannelCard from '@/components/ChannelCard.vue'
 import AdRenderer from '@/components/AdRenderer.vue'
 
 const route = useRoute()
 const router = useRouter()
 const matchesStore = useMatchesStore()
-const channelsStore = useChannelsStore()
 
-// Tab keys map to channel "section" values for the collection tabs.
-const SECTION_KEY = { news: 'news', playlists: 'playlist', dawah: 'dawah' }
-
-const validTabs = ['all', 'live', 'news', 'playlists', 'dawah']
+const validTabs = ['all', 'live', 'upcoming', 'ended']
 const activeTab = ref(validTabs.includes(route.query.tab) ? route.query.tab : 'all')
 
-const isMatchTab = computed(() => activeTab.value === 'all' || activeTab.value === 'live')
+// Determine a match's status — kept consistent with the LIVE badge in MatchCard
+// (live if the provider says live OR the match is currently within its time window).
+const statusOf = (m) => {
+  if (m.status === 'live' || m.isLive === true) return 'live'
+  if (m.status === 'finished') return 'finished'
+  if (m.status === 'upcoming') return 'upcoming'
+  const now = new Date()
+  const start = m.startTime ? new Date(m.startTime) : null
+  const end = m.endTime ? new Date(m.endTime) : null
+  if (start && end && now >= start && now <= end) return 'live'
+  if (start && now < start) return 'upcoming'
+  return 'finished'
+}
+
+// Ordering priority: pinned (admin) → live → upcoming → ended.
+const rankOf = (m) => {
+  if (m.isPinned === true) return 0
+  const s = statusOf(m)
+  if (s === 'live') return 1
+  if (s === 'upcoming') return 2
+  return 3 // finished
+}
+
+const sortByPriority = (list) =>
+  list
+    .map((m, i) => ({ m, i }))
+    .sort((a, b) => rankOf(a.m) - rankOf(b.m) || a.i - b.i)
+    .map((x) => x.m)
 
 const matchesToShow = computed(() => {
-  if (activeTab.value === 'live') return matchesStore.liveMatches
-  // "All" — live first, then upcoming.
-  return [...matchesStore.liveMatches, ...matchesStore.upcomingMatches]
+  const all = matchesStore.matches
+  let list = all
+  if (activeTab.value === 'live') list = all.filter((m) => statusOf(m) === 'live')
+  else if (activeTab.value === 'upcoming') list = all.filter((m) => statusOf(m) === 'upcoming')
+  else if (activeTab.value === 'ended') list = all.filter((m) => statusOf(m) === 'finished')
+  return sortByPriority(list)
 })
 
-const sectionItems = computed(() =>
-  channelsStore.getSection(SECTION_KEY[activeTab.value] || 'news')
-)
-
-const ensureSection = (tab) => {
-  const key = SECTION_KEY[tab]
-  if (key) channelsStore.fetchSection(key)
-}
+const emptyLabel = computed(() => {
+  if (activeTab.value === 'live') return 'No live matches right now.'
+  if (activeTab.value === 'upcoming') return 'No upcoming matches.'
+  if (activeTab.value === 'ended') return 'No ended matches.'
+  return 'No matches available.'
+})
 
 const setTab = (tab) => {
   activeTab.value = tab
   router.replace({ query: tab === 'all' ? {} : { tab } })
-  ensureSection(tab)
 }
 
-// Keep tab in sync when navigating here via ?tab= links (navbar / bottom nav).
 watch(() => route.query.tab, (tab) => {
-  const next = validTabs.includes(tab) ? tab : 'all'
-  if (next !== activeTab.value) {
-    activeTab.value = next
-    ensureSection(next)
-  }
+  activeTab.value = validTabs.includes(tab) ? tab : 'all'
 })
 
 onMounted(() => {
   matchesStore.fetchMatches()
-  ensureSection(activeTab.value)
 })
 </script>
