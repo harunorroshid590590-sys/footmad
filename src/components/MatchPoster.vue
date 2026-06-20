@@ -5,34 +5,37 @@
     <div class="absolute top-1/3 -right-12 w-52 h-52 rounded-full bg-black/20 blur-2xl"></div>
     <div class="absolute -bottom-16 left-1/4 w-56 h-40 rounded-full bg-white/10 blur-3xl"></div>
 
-    <div class="relative h-full flex flex-col items-center justify-between p-3 sm:p-4 text-white text-center">
+    <div class="relative h-full flex flex-col items-center justify-between text-white text-center" :class="compact ? 'p-2' : 'p-3 sm:p-4'">
       <!-- Matchup title (pushed below the badge row so long names never overlap the badges) -->
-      <h3 class="font-extrabold leading-tight uppercase tracking-wide text-sm sm:text-lg drop-shadow-md line-clamp-2 mt-6 sm:mt-7 px-1">
+      <h3
+        class="font-extrabold leading-tight uppercase tracking-wide drop-shadow-md line-clamp-2 px-1"
+        :class="compact ? 'text-[10px] mt-5' : 'text-sm sm:text-lg mt-6 sm:mt-7'"
+      >
         {{ teamA }} <span class="opacity-80">vs</span> {{ teamB }}
       </h3>
 
       <!-- Flags + emblem -->
-      <div class="flex items-center justify-center gap-3 sm:gap-6 w-full">
-        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-white/95 overflow-hidden flex items-center justify-center shadow-lg shrink-0">
-          <img v-if="homeLogo && !homeErr" :src="homeLogo" :alt="teamA" class="w-full h-full object-contain p-2" @error="homeErr = true" />
-          <span v-else class="text-3xl sm:text-4xl">🏳️</span>
+      <div class="flex items-center justify-center w-full" :class="compact ? 'gap-2' : 'gap-3 sm:gap-6'">
+        <div class="rounded-xl bg-white/95 overflow-hidden flex items-center justify-center shadow-lg shrink-0" :class="flagClass">
+          <img v-if="homeLogo && !homeErr" :src="homeLogo" :alt="teamA" class="w-full h-full object-contain p-1.5" @error="homeErr = true" />
+          <span v-else :class="compact ? 'text-xl' : 'text-3xl sm:text-4xl'">🏳️</span>
         </div>
 
         <div class="flex flex-col items-center shrink-0">
-          <img v-if="emblem && !emblemErr" :src="emblem" alt="" class="w-12 h-12 sm:w-14 sm:h-14 object-contain drop-shadow" @error="emblemErr = true" />
-          <span v-else class="text-3xl sm:text-4xl">🏆</span>
+          <img v-if="emblem && !emblemErr" :src="emblem" alt="" class="object-contain drop-shadow" :class="emblemClass" @error="emblemErr = true" />
+          <span v-else :class="compact ? 'text-lg' : 'text-3xl sm:text-4xl'">🏆</span>
         </div>
 
-        <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-white/95 overflow-hidden flex items-center justify-center shadow-lg shrink-0">
-          <img v-if="awayLogo && !awayErr" :src="awayLogo" :alt="teamB" class="w-full h-full object-contain p-2" @error="awayErr = true" />
-          <span v-else class="text-3xl sm:text-4xl">🏳️</span>
+        <div class="rounded-xl bg-white/95 overflow-hidden flex items-center justify-center shadow-lg shrink-0" :class="flagClass">
+          <img v-if="awayLogo && !awayErr" :src="awayLogo" :alt="teamB" class="w-full h-full object-contain p-1.5" @error="awayErr = true" />
+          <span v-else :class="compact ? 'text-xl' : 'text-3xl sm:text-4xl'">🏳️</span>
         </div>
       </div>
 
       <!-- Meta -->
       <div class="w-full">
-        <p class="text-[11px] sm:text-xs font-semibold opacity-95 truncate">{{ eventName }}</p>
-        <p v-if="subline" class="text-[10px] sm:text-[11px] opacity-80 truncate">{{ subline }}</p>
+        <p class="font-semibold opacity-95 truncate" :class="compact ? 'text-[10px]' : 'text-[11px] sm:text-xs'">{{ eventName }}</p>
+        <p v-if="subline" class="opacity-80 truncate" :class="compact ? 'text-[9px]' : 'text-[10px] sm:text-[11px]'">{{ subline }}</p>
       </div>
     </div>
   </div>
@@ -44,11 +47,15 @@ import { resolveAsset } from '@/utils/assets'
 
 const props = defineProps({
   match: { type: Object, required: true },
+  compact: { type: Boolean, default: false },
 })
 
 const homeErr = ref(false)
 const awayErr = ref(false)
 const emblemErr = ref(false)
+
+const flagClass = computed(() => (props.compact ? 'w-11 h-11' : 'w-24 h-24 sm:w-28 sm:h-28'))
+const emblemClass = computed(() => (props.compact ? 'w-6 h-6' : 'w-12 h-12 sm:w-14 sm:h-14'))
 
 // Full literal class strings so Tailwind's JIT keeps them.
 const GRADIENTS = [

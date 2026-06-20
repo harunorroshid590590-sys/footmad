@@ -1,7 +1,8 @@
 <template>
   <router-link :to="`/watch/${match.id}`" class="block group">
     <!-- ===== MOBILE: full-bleed poster ===== -->
-    <div class="md:hidden rounded-xl overflow-hidden bg-black border border-border hover:border-border-strong transition-all">
+    <div class="md:hidden relative rounded-xl overflow-hidden bg-black border border-border hover:border-border-strong transition-all">
+      <HotRibbon v-if="isPinned" side="left" />
       <div class="relative aspect-[16/10] overflow-hidden">
         <img
           v-if="bannerUrl && !bannerErr"
@@ -11,16 +12,21 @@
           class="w-full h-full object-cover"
           @error="bannerErr = true"
         />
-        <MatchPoster v-else :match="match" />
+        <MatchPoster v-else :match="match" :compact="compact" />
 
-        <span v-if="isLive" class="absolute top-2 right-2 flex items-center gap-1 bg-accent text-white text-[10px] font-bold px-2 py-1 rounded shadow">
+        <span
+          v-if="isLive"
+          class="absolute flex items-center gap-1 bg-accent text-white font-bold rounded shadow"
+          :class="compact ? 'top-1 right-1 text-[8px] px-1.5 py-0.5' : 'top-2 right-2 text-[10px] px-2 py-1'"
+        >
           <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> LIVE
         </span>
-        <span v-else-if="isUpcoming" class="absolute top-2 right-2 bg-accent/90 text-white text-[10px] font-bold px-2 py-1 rounded shadow">COMING SOON</span>
-
-        <!-- Pinned badge (top-left) -->
-        <span v-if="isPinned" class="absolute top-2 left-2 flex items-center gap-1 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow">
-          🔥 PINNED
+        <span
+          v-else-if="isUpcoming"
+          class="absolute bg-accent/90 text-white font-bold rounded shadow"
+          :class="compact ? 'top-1 right-1 text-[8px] px-1.5 py-0.5' : 'top-2 right-2 text-[10px] px-2 py-1'"
+        >
+          COMING SOON
         </span>
       </div>
       <div class="bg-black px-3 py-2.5">
@@ -30,7 +36,8 @@
     </div>
 
     <!-- ===== DESKTOP: detailed card ===== -->
-    <div class="hidden md:block rounded-2xl p-5 border border-border bg-gradient-to-br from-card to-surface hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-card transition-all">
+    <div class="hidden md:block relative overflow-hidden rounded-2xl p-5 border border-border bg-gradient-to-br from-card to-surface hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-card transition-all">
+      <HotRibbon v-if="isPinned" side="right" />
       <!-- Badges -->
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-2">
@@ -45,9 +52,6 @@
             {{ match.category || 'Sports' }}
           </span>
         </div>
-        <span v-if="isPinned" class="flex items-center gap-1 bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[11px] font-bold px-2.5 py-1 rounded-full">
-          🔥 PINNED
-        </span>
       </div>
 
       <!-- Teams -->
@@ -91,10 +95,12 @@
 <script setup>
 import { computed, ref } from 'vue'
 import MatchPoster from './MatchPoster.vue'
+import HotRibbon from './HotRibbon.vue'
 import { resolveAsset } from '@/utils/assets'
 
 const props = defineProps({
   match: { type: Object, required: true },
+  compact: { type: Boolean, default: false },
 })
 
 const bannerErr = ref(false)

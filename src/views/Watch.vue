@@ -117,7 +117,7 @@
         <aside class="lg:col-span-1">
           <h3 class="text-white font-semibold mb-3">Up Next</h3>
           <div v-if="related.length" class="grid grid-cols-2 lg:grid-cols-1 gap-3">
-            <MatchCard v-for="m in related" :key="m.id" :match="m" />
+            <MatchCard v-for="m in related" :key="m.id" :match="m" compact />
           </div>
           <p v-else class="text-text-muted text-sm">No other matches right now.</p>
         </aside>
