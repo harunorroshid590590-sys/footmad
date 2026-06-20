@@ -27,7 +27,7 @@
       </div>
 
       <!-- Player + content -->
-      <div v-else class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div v-else class="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
         <!-- Main -->
         <div class="lg:col-span-3 space-y-4">
           <!-- Player -->
@@ -109,9 +109,9 @@
           </div>
         </div>
 
-        <!-- Related rail -->
-        <aside class="lg:col-span-1">
-          <h3 class="text-white font-semibold mb-3">Up Next</h3>
+        <!-- Related rail (scrolls independently on desktop) -->
+        <aside class="lg:col-span-1 lg:sticky lg:top-20 lg:self-start lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto lg:pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          <h3 class="text-white font-semibold mb-3 lg:sticky lg:top-0 lg:bg-background lg:py-1 lg:z-10">Up Next</h3>
           <div v-if="related.length" class="grid grid-cols-2 lg:grid-cols-1 gap-3">
             <MatchCard v-for="m in related" :key="m.id" :match="m" compact />
           </div>
