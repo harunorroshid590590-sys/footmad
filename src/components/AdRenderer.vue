@@ -1,17 +1,17 @@
 <template>
   <div v-if="config.adSettings.enabled">
     <!-- Top Banner -->
-    <div v-if="config.bannerAds.top.enabled" class="w-full mb-4">
+    <div v-if="config.bannerAds.top.enabled && getBannerCode('top')" class="w-full mb-4">
       <div v-html="getBannerCode('top')" class="ad-container"></div>
     </div>
 
     <!-- Middle Banner -->
-    <div v-if="config.bannerAds.middle.enabled" class="w-full my-8">
+    <div v-if="config.bannerAds.middle.enabled && getBannerCode('middle')" class="w-full my-8">
       <div v-html="getBannerCode('middle')" class="ad-container"></div>
     </div>
 
     <!-- Bottom Banner -->
-    <div v-if="config.bannerAds.bottom.enabled" class="w-full mt-4">
+    <div v-if="config.bannerAds.bottom.enabled && getBannerCode('bottom')" class="w-full mt-4">
       <div v-html="getBannerCode('bottom')" class="ad-container"></div>
     </div>
 
@@ -147,7 +147,6 @@ onMounted(() => {
 <style scoped>
 .ad-container {
   width: 100%;
-  min-height: 50px;
 }
 
 .ad-container :deep(iframe) {

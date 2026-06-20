@@ -17,6 +17,11 @@
           <span class="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> LIVE
         </span>
         <span v-else-if="isUpcoming" class="absolute top-2 right-2 bg-accent/90 text-white text-[10px] font-bold px-2 py-1 rounded shadow">COMING SOON</span>
+
+        <!-- Pinned badge (top-left) -->
+        <span v-if="isPinned" class="absolute top-2 left-2 flex items-center gap-1 bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow">
+          🔥 PINNED
+        </span>
       </div>
       <div class="bg-black px-3 py-2.5">
         <h3 class="text-white font-extrabold text-sm leading-tight truncate">{{ matchup }}</h3>

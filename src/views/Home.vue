@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-background">
     <TickerStrip />
 
-    <div class="max-w-screen-2xl mx-auto px-3 sm:px-4 py-2">
+    <div class="max-w-screen-2xl mx-auto px-3 sm:px-4 pt-0 pb-2">
       <AdRenderer />
 
       <ContentTabs :active="activeTab" @change="setTab" />

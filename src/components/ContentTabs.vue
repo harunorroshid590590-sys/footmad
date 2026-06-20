@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide py-3">
+  <div class="flex items-center gap-2 overflow-x-auto scrollbar-hide pt-2 pb-2">
     <button
       v-for="tab in tabs"
       :key="tab.key"
