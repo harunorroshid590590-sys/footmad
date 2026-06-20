@@ -53,6 +53,19 @@
           <!-- Server tabs (TV-remote navigable: ←/→ to move, OK to switch) -->
           <ServerTabs :servers="servers" :current="currentServerIndex" @select="switchServer" />
 
+          <!-- Admin banner for this match (clickable to its link) -->
+          <component
+            v-if="matchBannerUrl"
+            :is="match.bannerLink ? 'a' : 'div'"
+            :href="match.bannerLink || undefined"
+            :target="match.bannerLink ? '_blank' : undefined"
+            rel="noopener"
+            class="block rounded-xl overflow-hidden border border-border mb-4 w-full h-20 sm:h-24"
+            :class="match.bannerLink ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''"
+          >
+            <img :src="matchBannerUrl" alt="Banner" class="block w-full h-full object-cover" />
+          </component>
+
           <!-- Match header: flags VS + share -->
           <div class="bg-card border border-border rounded-2xl p-4">
             <div class="flex items-center justify-between gap-3 mb-3">
@@ -65,9 +78,6 @@
               <div class="flex items-center gap-2">
                 <button @click="shareMatch" class="p-2 bg-surface hover:bg-card-hover rounded-lg transition-colors" title="Share">
                   <svg class="w-5 h-5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.7 10.7l6.6-3.4M8.7 13.3l6.6 3.4M18 8a3 3 0 10-3-3 3 3 0 003 3zM6 15a3 3 0 100-6 3 3 0 000 6zm12 7a3 3 0 100-6 3 3 0 000 6z" /></svg>
-                </button>
-                <button @click="openExternalPlayer" class="p-2 bg-surface hover:bg-card-hover rounded-lg transition-colors" title="Open in external player">
-                  <svg class="w-5 h-5 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                 </button>
               </div>
             </div>
@@ -219,6 +229,7 @@ const currentStream = computed(() => servers.value[currentServerIndex.value] || 
 
 const homeFlag = computed(() => (homeErr.value ? '' : resolveAsset(match.value?.homeLogo)))
 const awayFlag = computed(() => (awayErr.value ? '' : resolveAsset(match.value?.awayLogo)))
+const matchBannerUrl = computed(() => resolveAsset(match.value?.banner))
 
 const related = computed(() =>
   matchesStore.matches.filter((m) => String(m.id) !== String(match.value?.id)).slice(0, 8)

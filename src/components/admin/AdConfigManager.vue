@@ -52,6 +52,48 @@
       </div>
     </div>
 
+    <!-- Watch Page Banner (clickable image) -->
+    <div class="bg-card rounded-xl border border-border p-6">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-lg font-semibold text-white">Watch Page Banner</h3>
+          <p class="text-text-muted text-sm">Clickable image banner shown above the match info on the watch page.</p>
+        </div>
+        <input
+          v-model="config.watchBanner.enabled"
+          type="checkbox"
+          class="w-5 h-5 rounded border-border bg-card-hover text-primary focus:ring-primary"
+        />
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-text-muted text-sm mb-2">Banner Image URL</label>
+          <input
+            v-model="config.watchBanner.image"
+            type="text"
+            placeholder="https://example.com/banner.jpg"
+            class="w-full bg-card-hover border border-border rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none"
+          />
+          <div class="flex items-center gap-3 mt-2">
+            <input ref="bannerFile" type="file" accept="image/*" class="hidden" @change="uploadBanner" />
+            <button type="button" @click="$refs.bannerFile.click()" :disabled="uploadingBanner" class="px-3 py-1.5 rounded-lg border border-border text-white text-sm hover:bg-card-hover disabled:opacity-50">
+              {{ uploadingBanner ? 'Uploading...' : 'or Upload image' }}
+            </button>
+            <img v-if="bannerPreview" :src="bannerPreview" alt="" class="h-10 rounded border border-border" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-text-muted text-sm mb-2">Link URL (opens when banner is clicked)</label>
+          <input
+            v-model="config.watchBanner.link"
+            type="url"
+            placeholder="https://example.com"
+            class="w-full bg-card-hover border border-border rounded-lg px-4 py-2 text-white focus:border-primary focus:outline-none"
+          />
+        </div>
+      </div>
+    </div>
+
     <!-- Banner Ads -->
     <div class="bg-card rounded-xl border border-border p-6">
       <h3 class="text-lg font-semibold text-white mb-4">Banner Ads</h3>
@@ -298,8 +340,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
+import { resolveAsset } from '@/utils/assets'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -322,15 +365,47 @@ const config = ref({
     enabled: true,
     frequency: 1,
     maxPopupPerSession: 3
+  },
+  watchBanner: {
+    enabled: false,
+    image: '',
+    link: ''
   }
 })
+
+const uploadingBanner = ref(false)
+const bannerPreview = computed(() => resolveAsset(config.value.watchBanner?.image))
 
 const fetchConfig = async () => {
   try {
     const response = await axios.get(`${API_URL}/ad-config`)
     config.value = response.data
+    // Ensure watchBanner exists for older configs
+    if (!config.value.watchBanner) {
+      config.value.watchBanner = { enabled: false, image: '', link: '' }
+    }
   } catch (error) {
     console.error('Error fetching ad config:', error)
+  }
+}
+
+const uploadBanner = async (e) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+  uploadingBanner.value = true
+  try {
+    const token = localStorage.getItem('admin_token')
+    const fd = new FormData()
+    fd.append('file', file)
+    const { data } = await axios.post(`${API_URL}/upload`, fd, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+    })
+    config.value.watchBanner.image = data.url
+  } catch (err) {
+    alert('Upload failed')
+  } finally {
+    uploadingBanner.value = false
+    e.target.value = ''
   }
 }
 

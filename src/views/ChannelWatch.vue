@@ -43,8 +43,11 @@
           <ServerTabs :servers="servers" :current="currentIndex" @select="selectServer" />
         </div>
 
+        <!-- Admin banner -->
+        <div class="mt-5"><WatchBanner /></div>
+
         <!-- Channel header -->
-        <div class="mt-5 flex items-center gap-3 bg-card border border-border rounded-2xl p-4">
+        <div class="mt-2 flex items-center gap-3 bg-card border border-border rounded-2xl p-4">
           <div class="w-12 h-12 rounded-xl overflow-hidden bg-surface border border-border flex items-center justify-center shrink-0">
             <img v-if="logoUrl && !logoErr" :src="logoUrl" :alt="channel.name" class="w-full h-full object-cover" @error="logoErr = true" />
             <span v-else class="text-xs font-bold text-text-muted">{{ channel.name?.slice(0, 3).toUpperCase() }}</span>
@@ -71,6 +74,7 @@ import axios from 'axios'
 import VideoPlayer from '@/components/VideoPlayer.vue'
 import PlayerOverlay from '@/components/PlayerOverlay.vue'
 import ServerTabs from '@/components/ServerTabs.vue'
+import WatchBanner from '@/components/WatchBanner.vue'
 import { normalizeServers } from '@/utils/stream'
 import { resolveAsset } from '@/utils/assets'
 import { friendlyStreamError } from '@/utils/playerError'
