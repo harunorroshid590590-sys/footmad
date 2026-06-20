@@ -25,14 +25,16 @@
       <!-- Results -->
       <div v-else>
         <div v-if="searchQuery && filteredMatches.length > 0">
-          <p class="text-text-muted mb-4">Found {{ filteredMatches.length }} results for "{{ searchQuery }}"</p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <p class="text-text-muted mb-2">Found {{ filteredMatches.length }} results for "{{ searchQuery }}"</p>
+          <ContentTabs :active="activeTab" @change="activeTab = $event" />
+          <div v-if="displayedMatches.length" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <MatchCard
-              v-for="match in filteredMatches"
+              v-for="match in displayedMatches"
               :key="match.id"
               :match="match"
             />
           </div>
+          <div v-else class="text-center py-16 text-text-muted">{{ emptyLabel }}</div>
         </div>
 
         <div v-else-if="searchQuery && filteredMatches.length === 0">
@@ -60,11 +62,14 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useMatchesStore } from '@/stores/matches'
 import MatchCard from '@/components/MatchCard.vue'
+import ContentTabs from '@/components/ContentTabs.vue'
+import { filterByTab, sortByPriority, emptyLabelFor } from '@/utils/matchStatus'
 
 const route = useRoute()
 const matchesStore = useMatchesStore()
 const searchQuery = ref('')
 const debouncedQuery = ref('')
+const activeTab = ref('all')
 let debounceTimer = null
 
 const debounceSearch = (query) => {
@@ -105,6 +110,11 @@ const filteredMatches = computed(() => {
     return false
   })
 })
+
+const displayedMatches = computed(() =>
+  sortByPriority(filterByTab(filteredMatches.value, activeTab.value))
+)
+const emptyLabel = computed(() => emptyLabelFor(activeTab.value))
 
 const handleSearch = () => {
   // Search is reactive via computed

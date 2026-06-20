@@ -46,6 +46,7 @@ import MobileSportsBar from '@/components/MobileSportsBar.vue'
 import MatchCard from '@/components/MatchCard.vue'
 import MatchCardSkeleton from '@/components/MatchCardSkeleton.vue'
 import AdRenderer from '@/components/AdRenderer.vue'
+import { filterByTab, sortByPriority, emptyLabelFor } from '@/utils/matchStatus'
 
 const route = useRoute()
 const router = useRouter()
@@ -54,50 +55,11 @@ const matchesStore = useMatchesStore()
 const validTabs = ['all', 'live', 'upcoming', 'ended']
 const activeTab = ref(validTabs.includes(route.query.tab) ? route.query.tab : 'all')
 
-// Determine a match's status — kept consistent with the LIVE badge in MatchCard
-// (live if the provider says live OR the match is currently within its time window).
-const statusOf = (m) => {
-  if (m.status === 'live' || m.isLive === true) return 'live'
-  if (m.status === 'finished') return 'finished'
-  if (m.status === 'upcoming') return 'upcoming'
-  const now = new Date()
-  const start = m.startTime ? new Date(m.startTime) : null
-  const end = m.endTime ? new Date(m.endTime) : null
-  if (start && end && now >= start && now <= end) return 'live'
-  if (start && now < start) return 'upcoming'
-  return 'finished'
-}
+const matchesToShow = computed(() =>
+  sortByPriority(filterByTab(matchesStore.matches, activeTab.value))
+)
 
-// Ordering priority: pinned (admin) → live → upcoming → ended.
-const rankOf = (m) => {
-  if (m.isPinned === true) return 0
-  const s = statusOf(m)
-  if (s === 'live') return 1
-  if (s === 'upcoming') return 2
-  return 3 // finished
-}
-
-const sortByPriority = (list) =>
-  list
-    .map((m, i) => ({ m, i }))
-    .sort((a, b) => rankOf(a.m) - rankOf(b.m) || a.i - b.i)
-    .map((x) => x.m)
-
-const matchesToShow = computed(() => {
-  const all = matchesStore.matches
-  let list = all
-  if (activeTab.value === 'live') list = all.filter((m) => statusOf(m) === 'live')
-  else if (activeTab.value === 'upcoming') list = all.filter((m) => statusOf(m) === 'upcoming')
-  else if (activeTab.value === 'ended') list = all.filter((m) => statusOf(m) === 'finished')
-  return sortByPriority(list)
-})
-
-const emptyLabel = computed(() => {
-  if (activeTab.value === 'live') return 'No live matches right now.'
-  if (activeTab.value === 'upcoming') return 'No upcoming matches.'
-  if (activeTab.value === 'ended') return 'No ended matches.'
-  return 'No matches available.'
-})
+const emptyLabel = computed(() => emptyLabelFor(activeTab.value))
 
 const setTab = (tab) => {
   activeTab.value = tab
