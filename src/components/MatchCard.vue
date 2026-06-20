@@ -12,7 +12,7 @@
           class="w-full h-full object-cover"
           @error="bannerErr = true"
         />
-        <MatchPoster v-else :match="match" :compact="compact" />
+        <MatchPoster v-else :match="match" :compact="compact" :countdown="countdown" />
 
         <span
           v-if="isLive"
@@ -64,8 +64,9 @@
           <h3 class="text-white font-semibold text-sm truncate px-1">{{ match.homeTeam || 'Home' }}</h3>
         </div>
 
-        <div class="px-3 shrink-0">
+        <div class="px-3 shrink-0 flex flex-col items-center">
           <span class="text-text-muted font-bold text-lg">VS</span>
+          <span v-if="countdown" class="text-primary-light text-[11px] font-semibold mt-1 whitespace-nowrap tabular-nums">⏱ {{ countdown }}</span>
         </div>
 
         <div class="flex-1 text-center min-w-0">
@@ -97,6 +98,7 @@ import { computed, ref } from 'vue'
 import MatchPoster from './MatchPoster.vue'
 import HotRibbon from './HotRibbon.vue'
 import { resolveAsset } from '@/utils/assets'
+import { useNow } from '@/composables/useNow'
 
 const props = defineProps({
   match: { type: Object, required: true },
@@ -131,6 +133,20 @@ const statusClass = computed(() => {
   if (isLive.value) return 'bg-accent/15 border-accent/30 text-accent'
   if (props.match.status === 'finished') return 'bg-white/5 border-border text-text-muted'
   return 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
+})
+
+const now = useNow()
+const countdown = computed(() => {
+  if (!isUpcoming.value || !props.match.startTime) return ''
+  const diff = new Date(props.match.startTime).getTime() - now.value
+  if (diff <= 0) return ''
+  let s = Math.floor(diff / 1000)
+  const d = Math.floor(s / 86400); s %= 86400
+  const h = Math.floor(s / 3600); s %= 3600
+  const m = Math.floor(s / 60); s %= 60
+  const pad = (n) => String(n).padStart(2, '0')
+  const hms = `${pad(h)}:${pad(m)}:${pad(s)}`
+  return d > 0 ? `${d}d ${hms}` : hms
 })
 
 const dateLabel = computed(() => {
