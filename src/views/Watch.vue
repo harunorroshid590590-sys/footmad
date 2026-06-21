@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-background">
-    <div class="px-2 sm:px-3 lg:px-4 py-4">
+    <div class="px-2 sm:px-3 lg:px-4 py-2 sm:py-4">
       <!-- Loading -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-24">
         <div class="w-14 h-14 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -34,7 +34,7 @@
           <div
             tabindex="0"
             data-focus-default
-            class="relative bg-black overflow-hidden shadow-card outline-none"
+            class="relative bg-black overflow-hidden shadow-card outline-none -mx-2 sm:mx-0"
             :class="showPreroll ? 'aspect-video' : ''"
           >
             <VideoPlayer
@@ -74,8 +74,8 @@
           </component>
 
           <!-- Match header: flags VS + share -->
-          <div class="bg-card border border-border rounded-2xl p-4">
-            <div class="flex items-center justify-between gap-3 mb-3">
+          <div class="bg-card border border-border rounded-2xl p-2.5 sm:p-4">
+            <div class="flex items-center justify-between gap-3 mb-1.5 sm:mb-2">
               <div class="flex items-center gap-2">
                 <span v-if="match.isLive" class="flex items-center gap-1.5 bg-accent text-white text-xs font-bold px-3 py-1 rounded-full">
                   <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span> LIVE
@@ -89,30 +89,30 @@
               </div>
             </div>
 
-            <div class="flex items-center justify-center gap-4 sm:gap-8 py-2">
-              <div class="flex flex-col items-center gap-2 flex-1 min-w-0">
-                <div class="w-14 h-14 rounded-xl bg-surface border border-border overflow-hidden flex items-center justify-center">
+            <div class="flex items-center justify-center gap-4 sm:gap-8 py-0.5">
+              <div class="flex flex-col items-center gap-1 flex-1 min-w-0">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-surface border border-border overflow-hidden flex items-center justify-center">
                   <img v-if="homeFlag" :src="homeFlag" :alt="match.homeTeam" class="w-full h-full object-contain p-1" @error="homeErr = true" />
-                  <span v-else class="text-2xl">🏳️</span>
+                  <span v-else class="text-xl sm:text-2xl">🏳️</span>
                 </div>
-                <span class="text-white font-semibold text-sm text-center truncate w-full">{{ match.homeTeam || 'Home' }}</span>
+                <span class="text-white font-semibold text-xs sm:text-sm text-center truncate w-full">{{ match.homeTeam || 'Home' }}</span>
               </div>
 
               <div class="flex flex-col items-center shrink-0">
-                <span class="text-text-muted font-bold text-xl">VS</span>
-                <span class="text-text-muted text-[11px] mt-1 whitespace-nowrap">{{ formatMatchTime(match.startTime) }}</span>
+                <span class="text-text-muted font-bold text-lg sm:text-xl">VS</span>
+                <span class="text-text-muted text-[10px] sm:text-[11px] mt-0.5 whitespace-nowrap">{{ formatMatchTime(match.startTime) }}</span>
               </div>
 
-              <div class="flex flex-col items-center gap-2 flex-1 min-w-0">
-                <div class="w-14 h-14 rounded-xl bg-surface border border-border overflow-hidden flex items-center justify-center">
+              <div class="flex flex-col items-center gap-1 flex-1 min-w-0">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-surface border border-border overflow-hidden flex items-center justify-center">
                   <img v-if="awayFlag" :src="awayFlag" :alt="match.awayTeam" class="w-full h-full object-contain p-1" @error="awayErr = true" />
-                  <span v-else class="text-2xl">🏳️</span>
+                  <span v-else class="text-xl sm:text-2xl">🏳️</span>
                 </div>
-                <span class="text-white font-semibold text-sm text-center truncate w-full">{{ match.awayTeam || 'Away' }}</span>
+                <span class="text-white font-semibold text-xs sm:text-sm text-center truncate w-full">{{ match.awayTeam || 'Away' }}</span>
               </div>
             </div>
 
-            <p v-if="match.eventName" class="text-center text-text-muted text-xs mt-2">{{ match.eventName }}</p>
+            <p v-if="match.eventName" class="text-center text-text-muted text-xs mt-1">{{ match.eventName }}</p>
           </div>
         </div>
 
