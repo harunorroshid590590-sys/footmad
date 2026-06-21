@@ -35,10 +35,11 @@
         </div>
       </div>
 
-      <!-- Countdown (bottom) -->
-      <p v-if="countdown" class="font-semibold tabular-nums text-white/95 drop-shadow" :class="compact ? 'text-[9px]' : 'text-[11px] sm:text-sm'">
-        Starts in {{ countdown }}
-      </p>
+      <!-- Date + countdown (bottom) -->
+      <div v-if="countdown" class="text-center leading-tight">
+        <p v-if="dateLabel" class="font-medium text-white/90 drop-shadow" :class="compact ? 'text-[9px]' : 'text-xs sm:text-sm'">{{ dateLabel }}</p>
+        <p class="font-bold tabular-nums text-white drop-shadow" :class="compact ? 'text-[9px]' : 'text-sm sm:text-base'">⏱ {{ countdown }}</p>
+      </div>
     </div>
   </div>
 </template>
@@ -51,6 +52,7 @@ const props = defineProps({
   match: { type: Object, required: true },
   compact: { type: Boolean, default: false },
   countdown: { type: String, default: '' },
+  dateLabel: { type: String, default: '' },
 })
 
 const homeErr = ref(false)

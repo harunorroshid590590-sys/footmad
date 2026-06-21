@@ -12,7 +12,7 @@
           class="w-full h-full object-cover"
           @error="bannerErr = true"
         />
-        <MatchPoster v-else :match="match" :compact="compact" :countdown="countdown" />
+        <MatchPoster v-else :match="match" :compact="compact" :countdown="countdown" :date-label="dateLabel" />
 
         <span
           v-if="isLive"
@@ -31,7 +31,6 @@
       </div>
       <div class="bg-black px-3 py-2.5">
         <h3 class="text-white font-extrabold text-sm leading-tight truncate">{{ matchup }}</h3>
-        <p class="text-text-muted text-xs mt-0.5">{{ dateLabel }}</p>
       </div>
     </div>
 
