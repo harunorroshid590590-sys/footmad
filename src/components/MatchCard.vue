@@ -99,6 +99,7 @@ import MatchPoster from './MatchPoster.vue'
 import HotRibbon from './HotRibbon.vue'
 import { resolveAsset } from '@/utils/assets'
 import { useNow } from '@/composables/useNow'
+import { statusOf } from '@/utils/matchStatus'
 
 const props = defineProps({
   match: { type: Object, required: true },
@@ -115,27 +116,25 @@ const awayFlag = computed(() => (awayErr.value ? '' : resolveAsset(props.match.a
 
 const matchup = computed(() => `${props.match.homeTeam || 'Team A'} vs ${props.match.awayTeam || 'Team B'}`)
 
-const isLive = computed(() => props.match.status === 'live' || props.match.isLive === true)
-const isUpcoming = computed(() => {
-  if (isLive.value) return false
-  if (props.match.status) return props.match.status === 'upcoming'
-  if (!props.match.startTime) return false
-  return new Date(props.match.startTime) > new Date()
-})
+// Time-authoritative status shared with the home/category/search tabs.
+const now = useNow()
+const status = computed(() => { now.value; return statusOf(props.match) })
+const isLive = computed(() => status.value === 'live')
+const isUpcoming = computed(() => status.value === 'upcoming')
+const isFinished = computed(() => status.value === 'finished')
 const isPinned = computed(() => props.match.isPinned === true)
 
 const statusLabel = computed(() => {
   if (isLive.value) return 'LIVE'
-  if (props.match.status === 'finished') return 'FINISHED'
+  if (isFinished.value) return 'ENDED'
   return 'UPCOMING'
 })
 const statusClass = computed(() => {
   if (isLive.value) return 'bg-accent/15 border-accent/30 text-accent'
-  if (props.match.status === 'finished') return 'bg-white/5 border-border text-text-muted'
+  if (isFinished.value) return 'bg-white/5 border-border text-text-muted'
   return 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400'
 })
 
-const now = useNow()
 const countdown = computed(() => {
   if (!isUpcoming.value || !props.match.startTime) return ''
   const diff = new Date(props.match.startTime).getTime() - now.value
@@ -145,8 +144,10 @@ const countdown = computed(() => {
   const h = Math.floor(s / 3600); s %= 3600
   const m = Math.floor(s / 60); s %= 60
   const pad = (n) => String(n).padStart(2, '0')
-  const hms = `${pad(h)}:${pad(m)}:${pad(s)}`
-  return d > 0 ? `${d}d ${hms}` : hms
+  // Labelled format like the reference: "1d 07h 34m" (seconds only in the final hour).
+  if (d > 0) return `${d}d ${pad(h)}h ${pad(m)}m`
+  if (h > 0) return `${pad(h)}h ${pad(m)}m`
+  return `${pad(m)}m ${pad(s)}s`
 })
 
 const dateLabel = computed(() => {
@@ -154,8 +155,16 @@ const dateLabel = computed(() => {
   if (!value) return 'Schedule TBD'
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return 'Schedule TBD'
-  const day = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
   const time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+  // Relative day label like the reference: Today / Tomorrow / weekday / date.
+  const startOfDay = (dt) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate())
+  const dayDiff = Math.round((startOfDay(d) - startOfDay(new Date())) / 86400000)
+  let day
+  if (dayDiff === 0) day = 'Today'
+  else if (dayDiff === 1) day = 'Tomorrow'
+  else if (dayDiff === -1) day = 'Yesterday'
+  else if (dayDiff > 1 && dayDiff < 7) day = d.toLocaleDateString('en-US', { weekday: 'short' })
+  else day = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
   return `${day}, ${time}`
 })
 </script>

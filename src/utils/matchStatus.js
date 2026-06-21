@@ -3,15 +3,22 @@
 // Live if the provider says live OR the match is currently within its time window
 // (kept consistent with the LIVE badge in MatchCard).
 export const statusOf = (m) => {
+  const now = Date.now()
+  const start = m.startTime ? new Date(m.startTime).getTime() : NaN
+  const end = m.endTime ? new Date(m.endTime).getTime() : NaN
+  const hasStart = !Number.isNaN(start)
+  const hasEnd = !Number.isNaN(end)
+
+  // The provider keeps status as "upcoming" even after a match ends, so the clock
+  // is authoritative whenever we have valid times.
+  if (hasEnd && now > end) return 'finished'
+  if (hasStart && hasEnd && now >= start && now <= end) return 'live'
+  if (hasStart && now < start) return 'upcoming'
+
+  // Fallbacks when start/end times are missing or invalid.
   if (m.status === 'live' || m.isLive === true) return 'live'
   if (m.status === 'finished') return 'finished'
-  if (m.status === 'upcoming') return 'upcoming'
-  const now = new Date()
-  const start = m.startTime ? new Date(m.startTime) : null
-  const end = m.endTime ? new Date(m.endTime) : null
-  if (start && end && now >= start && now <= end) return 'live'
-  if (start && now < start) return 'upcoming'
-  return 'finished'
+  return 'upcoming'
 }
 
 // Filter a list by the active tab ('all' | 'live' | 'upcoming' | 'ended').

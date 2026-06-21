@@ -5,44 +5,40 @@
     <div class="absolute top-1/3 -right-12 w-52 h-52 rounded-full bg-black/20 blur-2xl"></div>
     <div class="absolute -bottom-16 left-1/4 w-56 h-40 rounded-full bg-white/10 blur-3xl"></div>
 
-    <div class="relative h-full flex flex-col items-center justify-between text-white text-center" :class="compact ? 'p-2' : 'p-3 sm:p-4'">
-      <!-- Matchup title (pushed below the badge row so long names never overlap the badges) -->
-      <h3
-        class="font-extrabold leading-tight uppercase tracking-wide drop-shadow-md line-clamp-2 px-1"
-        :class="compact ? 'text-[10px] mt-5' : 'text-sm sm:text-lg mt-6 sm:mt-7'"
-      >
-        {{ teamA }} <span class="opacity-80">vs</span> {{ teamB }}
-      </h3>
+    <div class="relative h-full flex flex-col items-center justify-center text-white text-center" :class="compact ? 'p-2 gap-1.5' : 'p-3 sm:p-4 gap-2 sm:gap-3'">
+      <!-- Event name (top) -->
+      <div class="w-full px-1">
+        <h3
+          class="font-extrabold leading-tight uppercase tracking-wide drop-shadow-md line-clamp-2"
+          :class="compact ? 'text-[10px]' : 'text-sm sm:text-lg'"
+        >
+          {{ eventName }}
+        </h3>
+        <p v-if="subline" class="font-semibold opacity-90 truncate" :class="compact ? 'text-[9px]' : 'text-[11px] sm:text-xs'">{{ subline }}</p>
+      </div>
 
-      <!-- Flags + emblem + countdown -->
-      <div class="flex flex-col items-center w-full" :class="compact ? 'gap-1' : 'gap-2'">
-        <div class="flex items-center justify-center w-full" :class="compact ? 'gap-2' : 'gap-3 sm:gap-6'">
-          <div class="rounded-full overflow-hidden flex items-center justify-center shadow-lg shrink-0" :class="flagClass">
-            <img v-if="homeLogo && !homeErr" :src="homeLogo" :alt="teamA" class="w-full h-full object-cover" @error="homeErr = true" />
-            <span v-else :class="compact ? 'text-xl' : 'text-3xl sm:text-4xl'">🏳️</span>
-          </div>
-
-          <div class="flex flex-col items-center shrink-0">
-            <img v-if="emblem && !emblemErr" :src="emblem" alt="" class="object-contain drop-shadow" :class="emblemClass" @error="emblemErr = true" />
-            <span v-else :class="compact ? 'text-lg' : 'text-3xl sm:text-4xl'">🏆</span>
-          </div>
-
-          <div class="rounded-full overflow-hidden flex items-center justify-center shadow-lg shrink-0" :class="flagClass">
-            <img v-if="awayLogo && !awayErr" :src="awayLogo" :alt="teamB" class="w-full h-full object-cover" @error="awayErr = true" />
-            <span v-else :class="compact ? 'text-xl' : 'text-3xl sm:text-4xl'">🏳️</span>
-          </div>
+      <!-- Flags + emblem -->
+      <div class="flex items-center justify-center w-full" :class="compact ? 'gap-2' : 'gap-3 sm:gap-6'">
+        <div class="rounded-full overflow-hidden flex items-center justify-center shadow-lg shrink-0" :class="flagClass">
+          <img v-if="homeLogo && !homeErr" :src="homeLogo" :alt="teamA" class="w-full h-full object-cover" @error="homeErr = true" />
+          <span v-else :class="compact ? 'text-xl' : 'text-3xl sm:text-4xl'">🏳️</span>
         </div>
 
-        <p v-if="countdown" class="font-extrabold tabular-nums text-white drop-shadow" :class="compact ? 'text-[10px]' : 'text-xs sm:text-sm'">
-          ⏱ {{ countdown }}
-        </p>
+        <div class="flex flex-col items-center shrink-0">
+          <img v-if="emblem && !emblemErr" :src="emblem" alt="" class="object-contain drop-shadow" :class="emblemClass" @error="emblemErr = true" />
+          <span v-else :class="compact ? 'text-lg' : 'text-3xl sm:text-4xl'">🏆</span>
+        </div>
+
+        <div class="rounded-full overflow-hidden flex items-center justify-center shadow-lg shrink-0" :class="flagClass">
+          <img v-if="awayLogo && !awayErr" :src="awayLogo" :alt="teamB" class="w-full h-full object-cover" @error="awayErr = true" />
+          <span v-else :class="compact ? 'text-xl' : 'text-3xl sm:text-4xl'">🏳️</span>
+        </div>
       </div>
 
-      <!-- Meta -->
-      <div class="w-full">
-        <p class="font-semibold opacity-95 truncate" :class="compact ? 'text-[10px]' : 'text-[11px] sm:text-xs'">{{ eventName }}</p>
-        <p v-if="subline" class="opacity-80 truncate" :class="compact ? 'text-[9px]' : 'text-[10px] sm:text-[11px]'">{{ subline }}</p>
-      </div>
+      <!-- Countdown (bottom) -->
+      <p v-if="countdown" class="font-semibold tabular-nums text-white/95 drop-shadow" :class="compact ? 'text-[9px]' : 'text-[11px] sm:text-sm'">
+        Starts in {{ countdown }}
+      </p>
     </div>
   </div>
 </template>
