@@ -1,10 +1,10 @@
 <template>
   <div id="app" class="min-h-screen bg-background">
-    <Navbar v-if="showSidebar" />
+    <Navbar v-if="showNavbar" />
     <AppSidebar v-if="showSidebar" />
     <main
       class="transition-[padding]"
-      :class="showSidebar ? 'pt-14 pb-20 md:pb-8 md:pl-[72px]' : ''"
+      :class="[showNavbar ? 'pt-14' : '', showSidebar ? 'pb-20 md:pb-8 md:pl-[72px]' : '']"
     >
       <router-view />
     </main>
@@ -23,4 +23,6 @@ const route = useRoute()
 
 // Public surfaces get the sports sidebar + mobile bottom nav; admin keeps its own layout.
 const showSidebar = computed(() => !route.path.startsWith('/admin'))
+// Hide the top navbar on the watch page for a cleaner viewing experience.
+const showNavbar = computed(() => showSidebar.value && !route.path.startsWith('/watch'))
 </script>

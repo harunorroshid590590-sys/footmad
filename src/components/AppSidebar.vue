@@ -1,7 +1,8 @@
 <template>
   <aside
-    class="hidden md:flex fixed left-0 top-14 bottom-0 z-40 w-[72px] flex-col items-center
+    class="hidden md:flex fixed left-0 bottom-0 z-40 w-[72px] flex-col items-center
            bg-surface border-r border-border py-4 overflow-y-auto scrollbar-hide"
+    :class="isWatch ? 'top-0' : 'top-14'"
   >
     <!-- Quick actions -->
     <div class="flex flex-col items-center gap-2 pb-3 mb-3 border-b border-border w-full">
@@ -40,10 +41,14 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()
+
+// The watch page hides the top navbar, so the sidebar starts at the very top there.
+const isWatch = computed(() => route.path.startsWith('/watch'))
 
 import { SPORTS } from '@/data/sports'
 const sports = SPORTS

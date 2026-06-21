@@ -1,5 +1,5 @@
 <template>
-  <div class="relative w-full bg-black rounded-xl overflow-hidden shadow-2xl">
+  <div class="relative w-full bg-black overflow-hidden shadow-2xl">
     <!-- Loading Spinner -->
     <div
       v-if="loading"
