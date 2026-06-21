@@ -55,6 +55,12 @@ const sports = SPORTS
 
 const actions = [
   {
+    label: 'Home',
+    active: route.path === '/',
+    onClick: () => router.push('/'),
+    icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10"/></svg>',
+  },
+  {
     label: 'Search',
     active: false,
     onClick: () => router.push('/search'),

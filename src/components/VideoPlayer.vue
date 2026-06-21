@@ -68,10 +68,14 @@
         @click="seek"
       >
         <div
-          class="h-full bg-primary rounded-full relative"
-          :style="{ width: progress + '%' }"
+          class="h-full rounded-full relative"
+          :class="isLive ? 'bg-accent' : 'bg-primary'"
+          :style="{ width: isLive ? '100%' : progress + '%' }"
         >
-          <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full"></div>
+          <div
+            class="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full"
+            :class="isLive ? 'bg-accent' : 'bg-white'"
+          ></div>
         </div>
       </div>
 
