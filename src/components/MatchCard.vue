@@ -26,11 +26,20 @@
           class="absolute bg-accent/90 text-white font-bold rounded shadow"
           :class="compact ? 'top-1 right-1 text-[8px] px-1.5 py-0.5' : 'top-2 right-2 text-[10px] px-2 py-1'"
         >
-          COMING SOON
+          UPCOMING
+        </span>
+        <span
+          v-else-if="isFinished"
+          class="absolute bg-black/60 border border-white/20 text-white/90 font-bold rounded shadow"
+          :class="compact ? 'top-1 right-1 text-[8px] px-1.5 py-0.5' : 'top-2 right-2 text-[10px] px-2 py-1'"
+        >
+          ENDED
         </span>
       </div>
       <div class="bg-black px-3 py-2.5">
-        <h3 class="text-white font-extrabold text-sm leading-tight truncate">{{ matchup }}</h3>
+        <h3 class="text-white font-extrabold text-sm leading-tight">
+          <MarqueeText :text="matchup" />
+        </h3>
       </div>
     </div>
 
@@ -97,6 +106,7 @@
 import { computed, ref } from 'vue'
 import MatchPoster from './MatchPoster.vue'
 import HotRibbon from './HotRibbon.vue'
+import MarqueeText from './MarqueeText.vue'
 import { resolveAsset } from '@/utils/assets'
 import { useNow } from '@/composables/useNow'
 import { statusOf } from '@/utils/matchStatus'
