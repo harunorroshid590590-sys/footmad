@@ -35,26 +35,39 @@
             tabindex="0"
             data-focus-default
             class="relative bg-black overflow-hidden shadow-card outline-none -mx-2 sm:mx-0"
-            :class="showPreroll ? 'aspect-video' : ''"
+            :class="(showPreroll || isUpcomingMatch) ? 'aspect-video' : ''"
           >
-            <VideoPlayer
-              v-if="currentStream && !showPreroll"
-              :key="`${match.id}-${currentServerIndex}-${reloadKey}`"
-              :stream="currentStream"
-              :is-live="match.isLive"
-              @error="handlePlayerError"
-              @ready="handlePlayerReady"
-            />
-            <PlayerOverlay
-              v-if="!showPreroll && (playerError || retrying)"
-              :state="playerError ? 'error' : 'connecting'"
-              :message="errorMessage"
-              :server-name="currentStream?.title"
-              :has-next="false"
-              @retry="retryCurrent"
-            />
-            <!-- Pre-roll ad: plays before the stream, each time the match opens -->
-            <PrerollAd v-if="showPreroll" @complete="onPrerollDone" />
+            <!-- Upcoming match: countdown until it goes live (no stream yet) -->
+            <div
+              v-if="isUpcomingMatch"
+              class="absolute inset-0 flex items-center justify-center text-center overflow-hidden"
+            >
+              <img src="/img/Welcome%20to.png" alt="" class="absolute inset-0 w-full h-full object-cover opacity-20" />
+              <!-- Dark scrim so the text stays readable over the image -->
+              <div class="absolute inset-0 bg-black/70"></div>
+              <div class="relative z-10 px-4 [text-shadow:0_2px_8px_rgba(0,0,0,0.9)]">
+                <span class="inline-block bg-emerald-500/25 text-emerald-300 text-xs font-bold px-3 py-1 rounded-full mb-3">UPCOMING</span>
+                <h2 class="text-white text-xl sm:text-4xl font-extrabold">{{ match.homeTeam }} <span class="text-white/70">vs</span> {{ match.awayTeam }}</h2>
+                <p class="text-white/85 text-sm sm:text-base mt-2">{{ matchDateLabel }}</p>
+                <p class="text-white/70 text-xs sm:text-sm mt-5 uppercase tracking-wide">Starts in</p>
+                <p class="text-white text-3xl sm:text-5xl font-extrabold tabular-nums mt-1">{{ matchCountdown }}</p>
+                <p class="text-white/70 text-xs sm:text-sm mt-5">Please wait — the match will begin soon.</p>
+              </div>
+            </div>
+
+            <!-- Live / finished: the player (owns its loading image, auto-retry, errors) -->
+            <template v-else>
+              <VideoPlayer
+                v-if="currentStream && !showPreroll"
+                :key="`${match.id}-${currentServerIndex}-${reloadKey}`"
+                :stream="currentStream"
+                :is-live="match.isLive"
+                @error="handlePlayerError"
+                @ready="handlePlayerReady"
+              />
+              <!-- Pre-roll ad: plays before the stream, each time the match opens -->
+              <PrerollAd v-if="showPreroll" @complete="onPrerollDone" />
+            </template>
           </div>
 
           <!-- Server tabs (TV-remote navigable: ←/→ to move, OK to switch) -->
@@ -141,7 +154,8 @@ import MatchCard from '@/components/MatchCard.vue'
 import { useMatchesStore } from '@/stores/matches'
 import { resolveAsset } from '@/utils/assets'
 import { friendlyStreamError } from '@/utils/playerError'
-import { sortByPriority } from '@/utils/matchStatus'
+import { sortByPriority, statusOf } from '@/utils/matchStatus'
+import { useNow } from '@/composables/useNow'
 
 const route = useRoute()
 const matchesStore = useMatchesStore()
@@ -251,6 +265,45 @@ const related = computed(() =>
   )
 )
 
+// Upcoming matches show a countdown instead of trying to play a stream that
+// isn't live yet.
+const now = useNow()
+const isUpcomingMatch = computed(() => {
+  now.value
+  return !!match.value && statusOf(match.value) === 'upcoming'
+})
+
+const matchCountdown = computed(() => {
+  const start = match.value?.startTime ? new Date(match.value.startTime).getTime() : NaN
+  if (Number.isNaN(start)) return ''
+  const diff = start - now.value
+  if (diff <= 0) return ''
+  let s = Math.floor(diff / 1000)
+  const d = Math.floor(s / 86400); s %= 86400
+  const h = Math.floor(s / 3600); s %= 3600
+  const m = Math.floor(s / 60); s %= 60
+  const pad = (n) => String(n).padStart(2, '0')
+  if (d > 0) return `${d}d ${pad(h)}h ${pad(m)}m`
+  if (h > 0) return `${pad(h)}h ${pad(m)}m`
+  return `${pad(m)}m ${pad(s)}s`
+})
+
+const matchDateLabel = computed(() => {
+  const value = match.value?.startTime
+  if (!value) return ''
+  const dt = new Date(value)
+  if (Number.isNaN(dt.getTime())) return ''
+  const time = dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+  const startOfDay = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate())
+  const dayDiff = Math.round((startOfDay(dt) - startOfDay(new Date(now.value))) / 86400000)
+  let day
+  if (dayDiff === 0) day = 'Today'
+  else if (dayDiff === 1) day = 'Tomorrow'
+  else if (dayDiff > 1 && dayDiff < 7) day = dt.toLocaleDateString('en-US', { weekday: 'short' })
+  else day = dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+  return `${day}, ${time}`
+})
+
 const loadMatch = async () => {
   const matchId = route.params.id
   if (!matchId) {
@@ -277,8 +330,11 @@ const loadMatch = async () => {
       return
     }
     match.value = normalizedMatch
-    // Play the pre-roll ad (if configured) before the stream starts.
-    if (normalizedMatch.servers?.length) showPreroll.value = true
+    // Play the pre-roll ad (if configured) before the stream starts — but not for
+    // upcoming matches (they show a countdown until they go live).
+    if (normalizedMatch.servers?.length && statusOf(normalizedMatch) !== 'upcoming') {
+      showPreroll.value = true
+    }
   } catch (requestError) {
     match.value = null
     if (requestError.response?.status === 404) error.value = 'Match not found'

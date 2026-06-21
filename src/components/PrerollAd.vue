@@ -1,5 +1,13 @@
 <template>
-  <div v-if="ad" class="absolute inset-0 z-30 bg-black select-none">
+  <div class="absolute inset-0 z-30 bg-black select-none">
+    <!-- Loading image shown while the ad is being fetched -->
+    <template v-if="!ad">
+      <img src="/img/Welcome%20to.png" alt="Loading" class="w-full h-full object-cover" />
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-8 h-8 border-[3px] border-white border-t-transparent rounded-full animate-spin"></div>
+    </template>
+
+    <!-- Ad -->
+    <template v-else>
     <!-- Ad video -->
     <video
       ref="adVideo"
@@ -71,6 +79,7 @@
         <div class="h-full bg-amber-400 transition-[width] duration-200" :style="{ width: progress + '%' }"></div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 

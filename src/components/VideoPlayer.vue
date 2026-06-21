@@ -1,17 +1,17 @@
 <template>
   <div class="relative w-full bg-black overflow-hidden shadow-2xl">
-    <!-- Loading Spinner -->
+    <!-- Branded loading screen (shown while the stream buffers) -->
     <div
       v-if="loading"
-      class="absolute inset-0 flex flex-col items-center justify-center gap-3 z-20 bg-black/80"
+      class="absolute inset-0 z-20 bg-black"
     >
-      <div class="w-11 h-11 border-[3px] border-primary border-t-transparent rounded-full animate-spin"></div>
-      <p class="text-text-muted text-sm">Loading stream…</p>
+      <img src="/img/Welcome%20to.png" alt="Loading" class="w-full h-full object-cover" />
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-8 h-8 border-[3px] border-white border-t-transparent rounded-full animate-spin"></div>
     </div>
 
-    <!-- Error Message -->
+    <!-- Error Message (only after auto-retries are exhausted) -->
     <div
-      v-if="error"
+      v-if="showError"
       class="absolute inset-0 z-20 flex flex-col items-center justify-center text-center bg-black/90 backdrop-blur-sm px-5 py-6"
     >
       <div class="w-12 h-12 rounded-full bg-accent/15 flex items-center justify-center mb-3">
@@ -22,7 +22,7 @@
       <h3 class="text-white text-base sm:text-lg font-semibold">Stream unavailable</h3>
       <p class="text-text-muted text-xs sm:text-sm max-w-[18rem] mt-1">This stream couldn’t be played. Try another server.</p>
       <button
-        @click="retry"
+        @click="manualRetry"
         class="mt-4 bg-primary hover:bg-primary-dark text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
       >
         Retry
@@ -33,6 +33,7 @@
     <video
       ref="videoElement"
       class="w-full aspect-video"
+      poster="/img/Welcome%20to.png"
       autoplay
       playsinline
       @error="handleError"
@@ -224,6 +225,22 @@ const jwContainer = ref(null)
 const loading = ref(true)
 const error = ref(null)
 const isPlaying = ref(false)
+
+// Auto-retry on stream failure: keep showing the loading image and silently
+// reload a few times before surfacing the manual "Stream unavailable" overlay.
+const MAX_AUTO_RETRY = 4
+const autoRetryCount = ref(0)
+let autoRetryTimer = null
+const showError = computed(() => !!error.value && autoRetryCount.value >= MAX_AUTO_RETRY)
+
+watch(error, (val) => {
+  if (val && autoRetryCount.value < MAX_AUTO_RETRY) {
+    autoRetryCount.value++
+    loading.value = true // show the branded image while we retry
+    clearTimeout(autoRetryTimer)
+    autoRetryTimer = setTimeout(() => retry(), 2500)
+  }
+})
 const isMuted = ref(false)
 const volume = ref(1)
 const currentTime = ref(0)
@@ -861,6 +878,15 @@ const setupEventListeners = () => {
     isPlaying.value = false
   })
 
+  // Show the branded loading screen until real frames render, and again while
+  // the stream re-buffers (avoids a plain black screen during loading).
+  video.addEventListener('waiting', () => { loading.value = true })
+  video.addEventListener('stalled', () => { loading.value = true })
+  video.addEventListener('playing', () => {
+    loading.value = false
+    autoRetryCount.value = 0 // stream is healthy again
+  })
+
   video.addEventListener('timeupdate', () => {
     currentTime.value = video.currentTime
     progress.value = video.duration ? (video.currentTime / video.duration) * 100 : 0
@@ -888,12 +914,14 @@ onMounted(() => {
 
 onUnmounted(() => {
   clearTimeout(controlsTimeout)
+  clearTimeout(autoRetryTimer)
   document.removeEventListener('fullscreenchange', handleFullscreenChange)
   destroyPlayer()
 })
 
 watch(() => props.stream, () => {
   if (!videoElement.value) return
+  autoRetryCount.value = 0 // fresh stream → allow auto-retries again
   destroyPlayer()
   initializePlayer()
 }, { deep: true })
@@ -1002,6 +1030,12 @@ const retry = () => {
   error.value = null
   destroyPlayer()
   initializePlayer()
+}
+
+// Manual retry from the error overlay — reset the auto-retry budget.
+const manualRetry = () => {
+  autoRetryCount.value = 0
+  retry()
 }
 
 const formatTime = (seconds) => {
