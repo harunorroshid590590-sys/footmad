@@ -3,7 +3,8 @@
   <router-link
     v-if="variant === 'card'"
     :to="to"
-    class="group relative flex flex-col rounded-2xl p-3 border border-[#2c2747] bg-gradient-to-b from-[#241b3d] via-[#1a1630] to-[#14111f] hover:border-primary/60 hover:-translate-y-0.5 transition-all"
+    class="group relative flex flex-col rounded-2xl p-3 border border-border bg-gradient-to-br hover:border-primary/50 hover:-translate-y-0.5 hover:shadow-card transition-all"
+    :class="[gradientClass, 'md:from-card md:via-card md:to-surface']"
   >
     <!-- Badges row -->
     <div class="flex items-center justify-between mb-2 h-5">
@@ -62,6 +63,25 @@ const props = defineProps({
 const logoErr = ref(false)
 const logoUrl = computed(() => resolveAsset(props.channel.logo))
 const to = computed(() => `/channel/${props.channel._id || props.channel.id}`)
+
+// Colourful gradient on mobile (like the home posters); overridden to the dark
+// card colour on desktop. Full literal strings so Tailwind's JIT keeps them.
+const GRADIENTS = [
+  'from-blue-600 via-indigo-600 to-emerald-500',
+  'from-emerald-600 via-teal-600 to-sky-600',
+  'from-orange-500 via-rose-500 to-purple-600',
+  'from-sky-500 via-blue-600 to-green-500',
+  'from-fuchsia-600 via-purple-600 to-blue-600',
+  'from-amber-500 via-orange-600 to-red-600',
+  'from-cyan-500 via-blue-600 to-indigo-700',
+  'from-lime-500 via-emerald-600 to-teal-700',
+]
+const gradientClass = computed(() => {
+  const key = props.channel.name || ''
+  let hash = 0
+  for (let i = 0; i < key.length; i++) hash = (hash + key.charCodeAt(i)) % GRADIENTS.length
+  return GRADIENTS[hash]
+})
 
 const serversCount = computed(() =>
   props.channel.serversCount ?? (Array.isArray(props.channel.servers) ? props.channel.servers.length : 0)

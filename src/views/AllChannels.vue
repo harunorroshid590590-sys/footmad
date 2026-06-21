@@ -19,18 +19,8 @@
     </div>
 
     <!-- Loading -->
-    <div v-if="store.loading && channels.length === 0">
-      <!-- mobile circles -->
-      <div class="grid grid-cols-4 sm:grid-cols-5 gap-x-3 gap-y-5 md:hidden">
-        <div v-for="i in 16" :key="i" class="flex flex-col items-center gap-2 animate-pulse">
-          <div class="w-16 h-16 rounded-full bg-card-hover"></div>
-          <div class="h-3 w-12 bg-card-hover rounded"></div>
-        </div>
-      </div>
-      <!-- desktop cards -->
-      <div class="hidden md:grid md:grid-cols-4 lg:grid-cols-6 gap-3">
-        <div v-for="i in 18" :key="i" class="rounded-xl bg-card border border-border p-4 pt-7 h-36 animate-pulse"></div>
-      </div>
+    <div v-if="store.loading && channels.length === 0" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      <div v-for="i in 18" :key="i" class="rounded-2xl bg-card border border-border p-4 pt-7 h-44 animate-pulse"></div>
     </div>
 
     <!-- Empty -->
@@ -38,17 +28,10 @@
       <p>{{ search ? 'No channels match your search.' : 'No channels available yet.' }}</p>
     </div>
 
-    <!-- Grid -->
-    <template v-else>
-      <!-- Mobile: circular tiles -->
-      <div class="grid grid-cols-4 sm:grid-cols-5 gap-x-3 gap-y-5 md:hidden">
-        <ChannelCard v-for="c in filtered" :key="`m-${c._id || c.id}`" :channel="c" variant="circle" />
-      </div>
-      <!-- Desktop: rich cards -->
-      <div class="hidden md:grid md:grid-cols-4 lg:grid-cols-6 gap-3">
-        <ChannelCard v-for="c in filtered" :key="`d-${c._id || c.id}`" :channel="c" variant="card" />
-      </div>
-    </template>
+    <!-- Grid: same rich cards on mobile and desktop (like the home cards) -->
+    <div v-else class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+      <ChannelCard v-for="c in filtered" :key="c._id || c.id" :channel="c" variant="card" />
+    </div>
   </div>
 </template>
 
