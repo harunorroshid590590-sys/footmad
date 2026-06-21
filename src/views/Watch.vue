@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-background">
-    <div class="max-w-screen-2xl mx-auto px-3 sm:px-4 py-6">
+    <div class="px-2 sm:px-3 lg:px-4 py-4">
       <!-- Loading -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-24">
         <div class="w-14 h-14 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -141,6 +141,7 @@ import MatchCard from '@/components/MatchCard.vue'
 import { useMatchesStore } from '@/stores/matches'
 import { resolveAsset } from '@/utils/assets'
 import { friendlyStreamError } from '@/utils/playerError'
+import { sortByPriority } from '@/utils/matchStatus'
 
 const route = useRoute()
 const matchesStore = useMatchesStore()
@@ -242,8 +243,12 @@ const homeFlag = computed(() => (homeErr.value ? '' : resolveAsset(match.value?.
 const awayFlag = computed(() => (awayErr.value ? '' : resolveAsset(match.value?.awayLogo)))
 const matchBannerUrl = computed(() => resolveAsset(match.value?.banner))
 
+// All other matches, in the same priority order as the home page
+// (pinned → live → upcoming → ended).
 const related = computed(() =>
-  matchesStore.matches.filter((m) => String(m.id) !== String(match.value?.id)).slice(0, 8)
+  sortByPriority(
+    matchesStore.matches.filter((m) => String(m.id) !== String(match.value?.id))
+  )
 )
 
 const loadMatch = async () => {
