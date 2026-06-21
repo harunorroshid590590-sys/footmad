@@ -66,7 +66,8 @@
 
         <div class="px-3 shrink-0 flex flex-col items-center">
           <span class="text-text-muted font-bold text-lg">VS</span>
-          <span v-if="countdown" class="text-primary-light text-[11px] font-semibold mt-1 whitespace-nowrap tabular-nums">⏱ {{ countdown }}</span>
+          <span v-if="countdown" class="text-text-muted text-[10px] mt-1 whitespace-nowrap">{{ dateLabel }}</span>
+          <span v-if="countdown" class="text-primary-light text-[11px] font-semibold mt-0.5 whitespace-nowrap tabular-nums">⏱ {{ countdown }}</span>
         </div>
 
         <div class="flex-1 text-center min-w-0">
