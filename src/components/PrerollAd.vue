@@ -77,6 +77,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import axios from 'axios'
+import { fetchVastAd } from '@/utils/vast'
 
 const emit = defineEmits(['complete'])
 
@@ -160,9 +161,16 @@ const tryPlay = async () => {
 
 onMounted(async () => {
   try {
-    const { data } = await axios.get(`${API_URL}/ad-config/vast`)
-    if (!data?.enabled || !data.mediaFile) { finish(); return }
-    ad.value = data
+    // Read the configured VAST tag, then resolve it in the browser so the ad
+    // network fills based on the real viewer (server-side fetch gets no ad).
+    const { data } = await axios.get(`${API_URL}/ad-config`)
+    const va = data?.videoAd
+    if (!va?.enabled || !va.vastUrl) { finish(); return }
+
+    const resolved = await fetchVastAd(va.vastUrl)
+    if (!resolved?.mediaFile) { finish(); return }
+
+    ad.value = { ...resolved, skipAfter: va.skipAfter ?? 5 }
     requestAnimationFrame(tryPlay)
     // Safety: if the ad never starts, don't block the stream.
     startTimer = window.setTimeout(() => {
