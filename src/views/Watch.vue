@@ -19,8 +19,8 @@
         <router-link to="/" class="text-primary-light hover:underline">Return home</router-link>
       </div>
 
-      <!-- No servers -->
-      <div v-else-if="servers.length === 0" class="flex flex-col items-center justify-center py-24 text-center">
+      <!-- No servers (and not an upcoming match — those show a countdown below) -->
+      <div v-else-if="servers.length === 0 && !isUpcomingMatch" class="flex flex-col items-center justify-center py-24 text-center">
         <p class="text-white text-lg font-semibold mb-2">No streams available</p>
         <p class="text-text-muted text-sm mb-4">This match has no active servers right now.</p>
         <button @click="loadMatch" class="bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-lg transition-colors">Refresh</button>
@@ -36,9 +36,9 @@
             data-focus-default
             class="relative bg-black overflow-hidden shadow-card outline-none -mx-2 sm:mx-0 aspect-video"
           >
-            <!-- Upcoming match: countdown until it goes live (no stream yet) -->
+            <!-- Upcoming match with no stream link: countdown until it goes live -->
             <div
-              v-if="isUpcomingMatch"
+              v-if="showCountdown"
               class="absolute inset-0 flex items-center justify-center text-center overflow-hidden"
             >
               <img src="/img/Welcome%20to.jpeg" alt="" class="absolute inset-0 w-full h-full object-cover opacity-20" />
@@ -272,6 +272,10 @@ const isUpcomingMatch = computed(() => {
   return !!match.value && statusOf(match.value) === 'upcoming'
 })
 
+// Show the countdown only when the match is upcoming AND has no stream link.
+// If links exist, we play the feed (pre-match coverage) even before kickoff.
+const showCountdown = computed(() => isUpcomingMatch.value && servers.value.length === 0)
+
 const matchCountdown = computed(() => {
   const start = match.value?.startTime ? new Date(match.value.startTime).getTime() : NaN
   if (Number.isNaN(start)) return ''
@@ -329,9 +333,10 @@ const loadMatch = async () => {
       return
     }
     match.value = normalizedMatch
-    // Play the pre-roll ad (if configured) before the stream starts — but not for
-    // upcoming matches (they show a countdown until they go live).
-    if (normalizedMatch.servers?.length && statusOf(normalizedMatch) !== 'upcoming') {
+    // Play the pre-roll ad (if configured) before the stream starts. Matches with
+    // links play even when upcoming (pre-match coverage); link-less upcoming ones
+    // fall through to the countdown screen.
+    if (normalizedMatch.servers?.length) {
       showPreroll.value = true
     }
   } catch (requestError) {
