@@ -6,7 +6,9 @@
       class="absolute inset-0 z-20 bg-black flex items-center justify-center"
     >
       <img src="/img/Welcome%20to.jpeg" alt="Loading" class="absolute inset-0 w-full h-full object-cover" />
-      <div class="relative w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin drop-shadow-lg"></div>
+      <div class="relative w-16 h-16 rounded-full bg-black/55 backdrop-blur-sm flex items-center justify-center shadow-lg">
+        <div class="w-10 h-10 border-[3px] border-white/20 border-t-primary rounded-full animate-spin"></div>
+      </div>
     </div>
 
     <!-- Mid-stream buffering: spinner only, over the frozen frame (no image) -->
@@ -14,8 +16,8 @@
       v-else-if="loading"
       class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
     >
-      <div class="w-16 h-16 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
-        <div class="w-9 h-9 border-[3px] border-white/30 border-t-white rounded-full animate-spin"></div>
+      <div class="w-16 h-16 rounded-full bg-black/55 backdrop-blur-sm flex items-center justify-center shadow-lg">
+        <div class="w-10 h-10 border-[3px] border-white/20 border-t-primary rounded-full animate-spin"></div>
       </div>
     </div>
 

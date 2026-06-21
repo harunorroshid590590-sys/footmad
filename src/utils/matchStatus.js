@@ -64,11 +64,25 @@ export const rankOf = (m) => {
   return 3
 }
 
-// Stable sort by the priority above.
+const startMs = (m) => {
+  const t = m.startTime ? new Date(m.startTime).getTime() : NaN
+  return Number.isNaN(t) ? Infinity : t
+}
+
+// Sort by the priority above; within the upcoming group, the match starting
+// soonest comes first. Other groups keep their original (stable) order.
 export const sortByPriority = (list) =>
   list
     .map((m, i) => ({ m, i }))
-    .sort((a, b) => rankOf(a.m) - rankOf(b.m) || a.i - b.i)
+    .sort((a, b) => {
+      const r = rankOf(a.m) - rankOf(b.m)
+      if (r !== 0) return r
+      if (rankOf(a.m) === 2) {
+        const dt = startMs(a.m) - startMs(b.m)
+        if (dt !== 0) return dt
+      }
+      return a.i - b.i
+    })
     .map((x) => x.m)
 
 export const emptyLabelFor = (tab) => {
