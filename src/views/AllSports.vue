@@ -24,6 +24,7 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useMatchesStore } from '@/stores/matches'
+import { matchInSport } from '@/utils/matchStatus'
 
 const matchesStore = useMatchesStore()
 
@@ -41,15 +42,10 @@ const SPORTS = [
   { name: 'WWE', slug: 'wwe', icon: '🤼' },
 ]
 
-const slugify = (s) => String(s || '').toLowerCase().replace(/[\s_]+/g, '-')
-
 const sportsWithCounts = computed(() =>
   SPORTS.map((sport) => ({
     ...sport,
-    count: matchesStore.matches.filter((m) => {
-      const cat = slugify(m.category)
-      return cat === sport.slug || cat === slugify(sport.name)
-    }).length,
+    count: matchesStore.matches.filter((m) => matchInSport(m, sport.slug)).length,
   }))
 )
 

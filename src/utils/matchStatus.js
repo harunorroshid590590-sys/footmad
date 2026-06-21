@@ -1,5 +1,31 @@
 // Shared match status + ordering helpers used by Home, Category, Search, etc.
 
+const slugify = (s) => String(s || '').toLowerCase().replace(/[\s_]+/g, '-')
+
+// Map a sidebar/All-Sports slug to the matches it represents. The provider uses
+// broad categories (Basketball, Baseball, Hockey, Motorsport, Boxing), so some
+// app sports (nba, mlb, nhl, formula-1, motogp, wwe) are aliases or title-based.
+export const matchInSport = (m, slug) => {
+  const cat = slugify(m.category)
+  const title = String(m.eventName || m.title || m.category || '').toLowerCase()
+  switch (slug) {
+    case 'nba': return cat === 'basketball'
+    case 'mlb': return cat === 'baseball'
+    case 'nhl': return cat === 'hockey'
+    case 'formula-1': return cat === 'motorsport' && /formula|f1/.test(title)
+    case 'motogp': return cat === 'motorsport' && /moto/.test(title)
+    case 'wwe': return cat === 'boxing' && /wwe|raw|smackdown|nxt|aew|wrestl/.test(title)
+    case 'ufc': return cat === 'ufc' || /ufc|mma/.test(title)
+    default: return cat === slug
+  }
+}
+
+// Friendly title for a slug (e.g. "nba" → "Basketball").
+export const sportDisplayName = (slug) => {
+  const map = { nba: 'Basketball', mlb: 'Baseball', nhl: 'Hockey', 'formula-1': 'Formula 1', motogp: 'MotoGP', wwe: 'WWE', ufc: 'UFC' }
+  return map[slug] || String(slug || '').replace(/-/g, ' ')
+}
+
 // Live if the provider says live OR the match is currently within its time window
 // (kept consistent with the LIVE badge in MatchCard).
 export const statusOf = (m) => {

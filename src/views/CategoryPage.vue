@@ -36,7 +36,7 @@ import { useMatchesStore } from '@/stores/matches'
 import MatchCard from '@/components/MatchCard.vue'
 import MatchCardSkeleton from '@/components/MatchCardSkeleton.vue'
 import ContentTabs from '@/components/ContentTabs.vue'
-import { filterByTab, sortByPriority, emptyLabelFor } from '@/utils/matchStatus'
+import { filterByTab, sortByPriority, emptyLabelFor, matchInSport, sportDisplayName } from '@/utils/matchStatus'
 
 const route = useRoute()
 const matchesStore = useMatchesStore()
@@ -45,7 +45,7 @@ const loading = computed(() => matchesStore.loading)
 const error = computed(() => matchesStore.error)
 
 const category = computed(() => route.params.category || 'All')
-const displayName = computed(() => category.value.replace(/-/g, ' '))
+const displayName = computed(() => sportDisplayName(category.value))
 const slugify = (s) => String(s || '').toLowerCase().replace(/[\s_]+/g, '-')
 
 const activeTab = ref('all')
@@ -53,7 +53,7 @@ const activeTab = ref('all')
 const categoryMatches = computed(() => {
   const slug = slugify(category.value)
   if (slug === 'all') return matchesStore.matches
-  return matchesStore.matches.filter((m) => slugify(m.category) === slug)
+  return matchesStore.matches.filter((m) => matchInSport(m, slug))
 })
 
 const displayedMatches = computed(() =>
