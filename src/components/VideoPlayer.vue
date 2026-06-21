@@ -841,6 +841,14 @@ const destroyPlayer = ({ keepVideoSrc = false } = {}) => {
 const setupEventListeners = () => {
   const video = videoElement.value
 
+  // Restore the user's mute/volume preference (persists across server switches).
+  const savedMuted = localStorage.getItem('fm_player_muted')
+  const savedVolume = localStorage.getItem('fm_player_volume')
+  if (savedMuted !== null) video.muted = savedMuted === '1'
+  if (savedVolume !== null) video.volume = parseFloat(savedVolume)
+  isMuted.value = video.muted
+  volume.value = video.volume
+
   video.addEventListener('play', () => {
     isPlaying.value = true
   })
@@ -861,6 +869,9 @@ const setupEventListeners = () => {
   video.addEventListener('volumechange', () => {
     volume.value = video.volume
     isMuted.value = video.muted
+    // Remember the preference so it carries over to the next server/stream.
+    localStorage.setItem('fm_player_muted', video.muted ? '1' : '0')
+    localStorage.setItem('fm_player_volume', String(video.volume))
   })
 
   document.addEventListener('fullscreenchange', handleFullscreenChange)
