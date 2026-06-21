@@ -5,7 +5,7 @@
       v-if="loading"
       class="absolute inset-0 z-20 bg-black"
     >
-      <img src="/img/Welcome%20to.png" alt="Loading" class="w-full h-full object-cover" />
+      <img src="/img/Welcome%20to.jpeg" alt="Loading" class="w-full h-full object-cover" />
       <div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-8 h-8 border-[3px] border-white border-t-transparent rounded-full animate-spin"></div>
     </div>
 
@@ -33,7 +33,7 @@
     <video
       ref="videoElement"
       class="w-full aspect-video"
-      poster="/img/Welcome%20to.png"
+      poster="/img/Welcome%20to.jpeg"
       autoplay
       playsinline
       @error="handleError"

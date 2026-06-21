@@ -42,7 +42,7 @@
               v-if="isUpcomingMatch"
               class="absolute inset-0 flex items-center justify-center text-center overflow-hidden"
             >
-              <img src="/img/Welcome%20to.png" alt="" class="absolute inset-0 w-full h-full object-cover opacity-20" />
+              <img src="/img/Welcome%20to.jpeg" alt="" class="absolute inset-0 w-full h-full object-cover opacity-20" />
               <!-- Dark scrim so the text stays readable over the image -->
               <div class="absolute inset-0 bg-black/70"></div>
               <div class="relative z-10 px-4 [text-shadow:0_2px_8px_rgba(0,0,0,0.9)]">
