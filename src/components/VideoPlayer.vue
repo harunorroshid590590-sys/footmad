@@ -115,9 +115,9 @@
             />
           </div>
 
-          <!-- Time -->
+          <!-- Time (live streams have no finite duration) -->
           <span class="text-white text-sm">
-            {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
+            {{ formatTime(currentTime) }}<template v-if="hasFiniteDuration"> / {{ formatTime(duration) }}</template>
           </span>
         </div>
 
@@ -224,6 +224,7 @@ const isMuted = ref(false)
 const volume = ref(1)
 const currentTime = ref(0)
 const duration = ref(0)
+const hasFiniteDuration = computed(() => Number.isFinite(duration.value) && duration.value > 0)
 const progress = ref(0)
 const isFullscreen = ref(false)
 const controlsVisible = ref(true)
