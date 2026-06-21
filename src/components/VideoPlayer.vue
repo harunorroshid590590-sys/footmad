@@ -65,8 +65,13 @@
     >
       <!-- Progress Bar -->
       <div
-        class="w-full h-1 bg-white/20 rounded-full mb-4 cursor-pointer"
+        tabindex="0"
+        role="slider"
+        aria-label="Seek (use left/right arrows)"
+        class="w-full h-1 bg-white/20 rounded-full mb-4 cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:h-1.5"
         @click="seek"
+        @keydown.left.prevent="seekBy(-10)"
+        @keydown.right.prevent="seekBy(10)"
       >
         <div
           class="h-full rounded-full relative"
@@ -946,6 +951,13 @@ const seek = (e) => {
   const rect = e.currentTarget.getBoundingClientRect()
   const percent = (e.clientX - rect.left) / rect.width
   videoElement.value.currentTime = percent * videoElement.value.duration
+}
+
+// TV/keyboard seek: ←/→ jump 10s (only meaningful for VOD with a real duration).
+const seekBy = (seconds) => {
+  const v = videoElement.value
+  if (!v || !isFinite(v.duration) || v.duration <= 0) return
+  v.currentTime = Math.min(v.duration, Math.max(0, v.currentTime + seconds))
 }
 
 const setQuality = (quality) => {
