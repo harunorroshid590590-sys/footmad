@@ -1,12 +1,22 @@
 <template>
-  <div class="relative w-full bg-black overflow-hidden shadow-2xl">
-    <!-- Branded loading screen (shown while the stream buffers) -->
+  <div class="relative w-full h-full bg-black overflow-hidden shadow-2xl">
+    <!-- Initial load: branded image + centered spinner -->
     <div
-      v-if="loading"
-      class="absolute inset-0 z-20 bg-black"
+      v-if="loading && !hasStarted"
+      class="absolute inset-0 z-20 bg-black flex items-center justify-center"
     >
-      <img src="/img/Welcome%20to.jpeg" alt="Loading" class="w-full h-full object-cover" />
-      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-8 h-8 border-[3px] border-white border-t-transparent rounded-full animate-spin"></div>
+      <img src="/img/Welcome%20to.jpeg" alt="Loading" class="absolute inset-0 w-full h-full object-cover" />
+      <div class="relative w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin drop-shadow-lg"></div>
+    </div>
+
+    <!-- Mid-stream buffering: spinner only, over the frozen frame (no image) -->
+    <div
+      v-else-if="loading"
+      class="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
+    >
+      <div class="w-16 h-16 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center">
+        <div class="w-9 h-9 border-[3px] border-white/30 border-t-white rounded-full animate-spin"></div>
+      </div>
     </div>
 
     <!-- Error Message (only after auto-retries are exhausted) -->
@@ -32,7 +42,7 @@
     <!-- Video Element -->
     <video
       ref="videoElement"
-      class="w-full aspect-video"
+      class="w-full h-full object-contain"
       poster="/img/Welcome%20to.jpeg"
       autoplay
       playsinline
@@ -41,7 +51,7 @@
 
     <div
       ref="jwContainer"
-      class="hidden w-full aspect-video"
+      class="hidden w-full h-full"
     ></div>
 
     <!-- Live Badge -->
@@ -228,6 +238,7 @@ const emit = defineEmits(['error', 'ready'])
 const videoElement = ref(null)
 const jwContainer = ref(null)
 const loading = ref(true)
+const hasStarted = ref(false) // true once the stream has rendered its first frame
 const error = ref(null)
 const isPlaying = ref(false)
 
@@ -889,6 +900,7 @@ const setupEventListeners = () => {
   video.addEventListener('stalled', () => { loading.value = true })
   video.addEventListener('playing', () => {
     loading.value = false
+    hasStarted.value = true // from now on, buffering shows spinner-only (no image)
     autoRetryCount.value = 0 // stream is healthy again
   })
 

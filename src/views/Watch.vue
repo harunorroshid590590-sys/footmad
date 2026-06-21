@@ -34,8 +34,7 @@
           <div
             tabindex="0"
             data-focus-default
-            class="relative bg-black overflow-hidden shadow-card outline-none -mx-2 sm:mx-0"
-            :class="(showPreroll || isUpcomingMatch) ? 'aspect-video' : ''"
+            class="relative bg-black overflow-hidden shadow-card outline-none -mx-2 sm:mx-0 aspect-video"
           >
             <!-- Upcoming match: countdown until it goes live (no stream yet) -->
             <div

@@ -15,7 +15,7 @@
 
       <div v-else class="max-w-5xl mx-auto">
         <!-- Player -->
-        <div tabindex="0" data-focus-default class="relative bg-black rounded-2xl overflow-hidden shadow-card outline-none">
+        <div tabindex="0" data-focus-default class="relative bg-black rounded-2xl overflow-hidden shadow-card outline-none aspect-video">
           <VideoPlayer
             v-if="currentServer"
             :key="`${channel._id}-${currentIndex}-${reloadKey}`"
