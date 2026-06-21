@@ -7,16 +7,15 @@
         ? 'translate-y-[160%] opacity-0 pointer-events-none'
         : 'translate-y-0 opacity-100 pointer-events-auto'"
     >
-      <!-- Live / Broadcast -->
+      <!-- Home (all matches) -->
       <router-link
-        to="/?tab=live"
+        to="/"
         class="w-12 h-12 rounded-2xl flex items-center justify-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary"
-        :class="isLiveActive ? 'bg-accent text-white' : 'text-text-muted hover:text-white'"
-        aria-label="Live"
+        :class="isHomeActive ? 'bg-primary text-white' : 'text-text-muted hover:text-white'"
+        aria-label="Home"
       >
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <circle cx="12" cy="12" r="2.5" fill="currentColor" stroke="none" />
-          <path stroke-linecap="round" d="M7.8 7.8a6 6 0 000 8.4M16.2 16.2a6 6 0 000-8.4M5 5a9.5 9.5 0 000 14M19 5a9.5 9.5 0 010 14" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10" />
         </svg>
       </router-link>
 
@@ -54,7 +53,7 @@ import { useRoute } from 'vue-router'
 
 const route = useRoute()
 
-const isLiveActive = computed(() => route.path === '/' && route.query.tab === 'live')
+const isHomeActive = computed(() => route.path === '/' && (!route.query.tab || route.query.tab === 'all' || route.query.tab === 'live'))
 const isChannelsActive = computed(() => route.path.startsWith('/channels'))
 const isUpcomingActive = computed(() => route.path === '/' && route.query.tab === 'upcoming')
 

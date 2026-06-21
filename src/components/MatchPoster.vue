@@ -17,8 +17,8 @@
       <!-- Flags + emblem + countdown -->
       <div class="flex flex-col items-center w-full" :class="compact ? 'gap-1' : 'gap-2'">
         <div class="flex items-center justify-center w-full" :class="compact ? 'gap-2' : 'gap-3 sm:gap-6'">
-          <div class="rounded-xl bg-white/95 overflow-hidden flex items-center justify-center shadow-lg shrink-0" :class="flagClass">
-            <img v-if="homeLogo && !homeErr" :src="homeLogo" :alt="teamA" class="w-full h-full object-contain p-1.5" @error="homeErr = true" />
+          <div class="rounded-full overflow-hidden flex items-center justify-center shadow-lg shrink-0" :class="flagClass">
+            <img v-if="homeLogo && !homeErr" :src="homeLogo" :alt="teamA" class="w-full h-full object-cover" @error="homeErr = true" />
             <span v-else :class="compact ? 'text-xl' : 'text-3xl sm:text-4xl'">🏳️</span>
           </div>
 
@@ -27,8 +27,8 @@
             <span v-else :class="compact ? 'text-lg' : 'text-3xl sm:text-4xl'">🏆</span>
           </div>
 
-          <div class="rounded-xl bg-white/95 overflow-hidden flex items-center justify-center shadow-lg shrink-0" :class="flagClass">
-            <img v-if="awayLogo && !awayErr" :src="awayLogo" :alt="teamB" class="w-full h-full object-contain p-1.5" @error="awayErr = true" />
+          <div class="rounded-full overflow-hidden flex items-center justify-center shadow-lg shrink-0" :class="flagClass">
+            <img v-if="awayLogo && !awayErr" :src="awayLogo" :alt="teamB" class="w-full h-full object-cover" @error="awayErr = true" />
             <span v-else :class="compact ? 'text-xl' : 'text-3xl sm:text-4xl'">🏳️</span>
           </div>
         </div>
