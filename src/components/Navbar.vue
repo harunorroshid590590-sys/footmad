@@ -5,9 +5,7 @@
       <div class="hidden md:flex items-center justify-between h-14">
         <!-- Brand -->
         <router-link to="/" class="flex items-center space-x-2 shrink-0">
-          <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center shadow-neon">
-            <span class="text-white font-extrabold text-lg">F</span>
-          </div>
+          <img src="/img/logo.png" alt="FootMad" class="w-9 h-9 rounded-full object-cover shadow-neon" />
           <span class="text-white font-extrabold text-xl tracking-tight">FootMad</span>
         </router-link>
 
@@ -61,7 +59,10 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <router-link to="/" class="text-white font-extrabold text-xl tracking-tight">FootMad</router-link>
+        <router-link to="/" class="flex items-center gap-2">
+          <img src="/img/logo.png" alt="FootMad" class="w-8 h-8 rounded-full object-cover shadow-neon" />
+          <span class="text-white font-extrabold text-xl tracking-tight">FootMad</span>
+        </router-link>
         <button @click="showMobileSearch = !showMobileSearch" class="text-white p-2 -mr-2" aria-label="Search">
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
