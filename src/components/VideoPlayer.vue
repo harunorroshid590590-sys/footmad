@@ -126,21 +126,27 @@
           <div class="relative">
             <button
               @click="showQualityMenu = !showQualityMenu"
-              class="text-white hover:text-primary transition-colors text-sm font-medium"
+              class="text-white hover:text-primary transition-colors flex items-center"
+              aria-label="Quality"
             >
-              {{ currentQuality }}
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <circle cx="12" cy="12" r="3" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 008 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H2a2 2 0 110-4h.09A1.65 1.65 0 004.6 8a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V2a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H22a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" />
+              </svg>
             </button>
             <div
               v-if="showQualityMenu"
-              class="absolute bottom-full right-0 mb-2 bg-card border border-border rounded-lg p-2 space-y-1 z-20"
+              class="absolute bottom-full right-0 mb-2 bg-card border border-border rounded-lg p-1.5 min-w-[130px] z-20"
             >
               <button
-                v-for="quality in qualities"
+                v-for="quality in qualityOptions"
                 :key="quality"
                 @click="setQuality(quality)"
-                class="block w-full text-left px-3 py-1 text-sm rounded hover:bg-card-hover transition-colors"
-                :class="{ 'text-primary': currentQuality === quality, 'text-text-muted': currentQuality !== quality }"
+                class="flex items-center gap-2 w-full text-left px-3 py-1.5 text-sm rounded hover:bg-card-hover transition-colors"
+                :class="currentQuality === quality ? 'text-white' : 'text-text-muted'"
               >
+                <svg v-if="currentQuality === quality" class="w-4 h-4 text-primary shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                <span v-else class="w-4 h-4 shrink-0"></span>
                 {{ quality }}
               </button>
             </div>
@@ -189,7 +195,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import Hls from 'hls.js'
 import shaka from 'shaka-player'
 
@@ -224,6 +230,14 @@ const controlsVisible = ref(true)
 const showQualityMenu = ref(false)
 const showSpeedMenu = ref(false)
 const currentQuality = ref('Auto')
+
+// Resolutions high → low, with "Auto" at the bottom (like a standard player menu).
+const qualityOptions = computed(() => {
+  const res = qualities.value
+    .filter((q) => q !== 'Auto')
+    .sort((a, b) => parseInt(b) - parseInt(a))
+  return [...res, 'Auto']
+})
 const playbackSpeed = ref(1)
 const qualities = ref(['Auto'])
 const speeds = ref([0.5, 0.75, 1, 1.25, 1.5, 2])
