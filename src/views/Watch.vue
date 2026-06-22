@@ -286,8 +286,8 @@ const matchCountdown = computed(() => {
   const h = Math.floor(s / 3600); s %= 3600
   const m = Math.floor(s / 60); s %= 60
   const pad = (n) => String(n).padStart(2, '0')
-  if (d > 0) return `${d}d ${pad(h)}h ${pad(m)}m`
-  if (h > 0) return `${pad(h)}h ${pad(m)}m`
+  if (d > 0) return `${d}d ${pad(h)}h ${pad(m)}m ${pad(s)}s`
+  if (h > 0) return `${pad(h)}h ${pad(m)}m ${pad(s)}s`
   return `${pad(m)}m ${pad(s)}s`
 })
 

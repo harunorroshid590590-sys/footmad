@@ -154,9 +154,9 @@ const countdown = computed(() => {
   const h = Math.floor(s / 3600); s %= 3600
   const m = Math.floor(s / 60); s %= 60
   const pad = (n) => String(n).padStart(2, '0')
-  // Labelled format like the reference: "1d 07h 34m" (seconds only in the final hour).
-  if (d > 0) return `${d}d ${pad(h)}h ${pad(m)}m`
-  if (h > 0) return `${pad(h)}h ${pad(m)}m`
+  // Labelled format like the reference, always including seconds: "1d 07h 34m 02s".
+  if (d > 0) return `${d}d ${pad(h)}h ${pad(m)}m ${pad(s)}s`
+  if (h > 0) return `${pad(h)}h ${pad(m)}m ${pad(s)}s`
   return `${pad(m)}m ${pad(s)}s`
 })
 
