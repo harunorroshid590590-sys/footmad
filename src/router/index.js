@@ -95,4 +95,15 @@ router.beforeEach((to, from, next) => {
   }
 })
 
+// Send a GA4 page_view on every route change so SPA navigations (watch pages,
+// categories, etc.) are counted — not just the initial load.
+router.afterEach((to) => {
+  if (typeof window.gtag !== 'function') return
+  window.gtag('event', 'page_view', {
+    page_path: to.fullPath,
+    page_location: window.location.href,
+    page_title: document.title
+  })
+})
+
 export default router
