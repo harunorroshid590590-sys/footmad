@@ -2,23 +2,21 @@
   <div v-if="config.adSettings.enabled">
     <!-- Top Banner -->
     <div v-if="config.bannerAds.top.enabled && getBannerCode('top')" class="w-full mb-4">
-      <div v-html="getBannerCode('top')" class="ad-container"></div>
+      <AdSlot :code="getBannerCode('top')" class="ad-container" />
     </div>
 
     <!-- Middle Banner -->
     <div v-if="config.bannerAds.middle.enabled && getBannerCode('middle')" class="w-full my-8">
-      <div v-html="getBannerCode('middle')" class="ad-container"></div>
+      <AdSlot :code="getBannerCode('middle')" class="ad-container" />
     </div>
 
     <!-- Bottom Banner -->
     <div v-if="config.bannerAds.bottom.enabled && getBannerCode('bottom')" class="w-full mt-4">
-      <div v-html="getBannerCode('bottom')" class="ad-container"></div>
+      <AdSlot :code="getBannerCode('bottom')" class="ad-container" />
     </div>
 
-    <!-- Popunder -->
-    <div v-if="shouldShowPopunder" class="hidden">
-      <div v-html="getPopunderCode()" class="ad-container"></div>
-    </div>
+    <!-- Popunder is injected as a real <script> element (see injectPopunder);
+         v-html can't execute scripts, which is why it never fired before. -->
 
     <!-- Direct Link Buttons -->
     <div v-if="config.directLinkAds.enabled" class="fixed z-50">
@@ -43,6 +41,8 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
+import AdSlot from './AdSlot.vue'
+import { injectPopunderOnce } from '@/utils/popunder'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -68,7 +68,6 @@ const config = ref({
   }
 })
 
-const popunderShownCount = ref(0)
 const isMobile = computed(() => window.innerWidth < 768)
 
 const fetchConfig = async () => {
@@ -95,31 +94,9 @@ const getBannerCode = (position) => {
   return banner.code || ''
 }
 
-const getPopunderCode = () => {
-  const device = isMobile.value ? 'mobile' : 'desktop'
-  const popunder = config.value.popunderAds[device]
-  
-  if (!popunder || !popunder.enabled) return ''
-  
-  return popunder.code || ''
-}
-
-const shouldShowPopunder = computed(() => {
-  const device = isMobile.value ? 'mobile' : 'desktop'
-  const popunder = config.value.popunderAds[device]
-  
-  if (!popunder || !popunder.enabled) return false
-  if (popunderShownCount.value >= config.value.adSettings.maxPopupPerSession) return false
-  
-  return true
-})
-
-const showPopunder = () => {
-  if (shouldShowPopunder.value) {
-    popunderShownCount.value++
-    // Trigger popunder logic here
-  }
-}
+// Popunder injection is shared with the watch page via a single session-wide
+// guard, so the script loads only once no matter which page the user lands on.
+const showPopunder = () => injectPopunderOnce(config.value)
 
 const getButtonPositionClass = (position) => {
   switch (position) {
@@ -134,13 +111,12 @@ const getButtonPositionClass = (position) => {
   }
 }
 
-onMounted(() => {
-  fetchConfig()
-  
-  // Show popunder after a delay
-  setTimeout(() => {
-    showPopunder()
-  }, 3000)
+onMounted(async () => {
+  // Load config, then inject the popunder script IMMEDIATELY so it's armed
+  // before the user clicks a match. A delay here meant the script wasn't loaded
+  // yet when the user clicked through, so no popunder fired.
+  await fetchConfig()
+  showPopunder()
 })
 </script>
 

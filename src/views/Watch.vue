@@ -1,5 +1,7 @@
 <template>
   <div class="min-h-screen bg-background">
+    <!-- Popunder ad (loads once per session, shared guard with the home page) -->
+    <PopunderAd />
     <div class="px-2 sm:px-3 lg:px-4 py-2 sm:py-4">
       <!-- Loading -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-24">
@@ -85,6 +87,9 @@
             <img :src="matchBannerUrl" alt="Banner" class="block w-full h-full object-cover" />
           </component>
 
+          <!-- Global watch-page ad banner (from Ad Config) -->
+          <WatchBanner />
+
           <!-- Match header: flags VS + share -->
           <div class="bg-card border border-border rounded-2xl p-2.5 sm:p-4">
             <div class="flex items-center justify-between gap-3 mb-1.5 sm:mb-2">
@@ -148,6 +153,8 @@ import axios from 'axios'
 import VideoPlayer from '@/components/VideoPlayer.vue'
 import PlayerOverlay from '@/components/PlayerOverlay.vue'
 import PrerollAd from '@/components/PrerollAd.vue'
+import WatchBanner from '@/components/WatchBanner.vue'
+import PopunderAd from '@/components/PopunderAd.vue'
 import ServerTabs from '@/components/ServerTabs.vue'
 import MatchCard from '@/components/MatchCard.vue'
 import { useMatchesStore } from '@/stores/matches'

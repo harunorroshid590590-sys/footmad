@@ -132,13 +132,13 @@
             <div class="flex items-center justify-between mb-6">
               <h1 class="text-2xl font-bold text-white">Matches</h1>
               <button
-                @click="showMatchModal = true"
+                @click="openAddMatch"
                 class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-colors"
               >
                 Add Match
               </button>
             </div>
-            <MatchesTable @edit="editMatch" @delete="deleteMatch" />
+            <MatchesTable ref="matchesTableRef" @edit="editMatch" @changed="fetchStats" />
           </div>
 
           <!-- Streams Management -->
@@ -204,6 +204,7 @@
     <MatchModal
       v-if="showMatchModal"
       :match="editingMatch"
+      :saving="savingMatch"
       @close="showMatchModal = false"
       @save="saveMatch"
     />
@@ -234,6 +235,7 @@ import AdsManager from '@/components/admin/AdsManager.vue'
 import CacheManager from '@/components/admin/CacheManager.vue'
 import SchedulerManager from '@/components/admin/SchedulerManager.vue'
 import AdConfigManager from '@/components/admin/AdConfigManager.vue'
+import api from '@/utils/axios'
 
 const router = useRouter()
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
@@ -244,6 +246,8 @@ const showMatchModal = ref(false)
 const showStreamModal = ref(false)
 const editingMatch = ref(null)
 const editingStream = ref(null)
+const savingMatch = ref(false)
+const matchesTableRef = ref(null)
 
 const sidebarItems = computed(() => [
   { id: 'dashboard', label: 'Dashboard', icon: '📊' },
@@ -288,41 +292,36 @@ const handleLogout = () => {
   router.push('/admin/login')
 }
 
+const openAddMatch = () => {
+  editingMatch.value = null
+  showMatchModal.value = true
+}
+
+// Opened from the Matches table (custom matches only — provider matches use the
+// in-table link editor instead).
 const editMatch = (match) => {
   editingMatch.value = match
   showMatchModal.value = true
 }
 
-const deleteMatch = async (id) => {
-  if (!confirm('Are you sure you want to delete this match?')) return
-  try {
-    const token = localStorage.getItem('admin_token')
-    await axios.delete(`${API_URL}/admin/matches/${id}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    fetchStats()
-  } catch (err) {
-    console.error('Failed to delete match:', err)
-  }
-}
-
+// Create or update an admin custom match.
 const saveMatch = async (matchData) => {
+  savingMatch.value = true
   try {
-    const token = localStorage.getItem('admin_token')
-    if (editingMatch.value) {
-      await axios.put(`${API_URL}/admin/matches/${editingMatch.value._id}`, matchData, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+    if (editingMatch.value?.isCustom) {
+      await api.put(`/admin/custom-matches/${editingMatch.value.id}`, matchData)
     } else {
-      await axios.post(`${API_URL}/admin/matches`, matchData, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+      await api.post('/admin/custom-matches', matchData)
     }
     showMatchModal.value = false
     editingMatch.value = null
+    matchesTableRef.value?.fetchMatches()
     fetchStats()
   } catch (err) {
     console.error('Failed to save match:', err)
+    alert('Failed to save match. Please try again.')
+  } finally {
+    savingMatch.value = false
   }
 }
 

@@ -56,17 +56,6 @@
       class="hidden w-full h-full"
     ></div>
 
-    <!-- Live Badge -->
-    <div
-      v-if="isLive"
-      class="absolute top-4 left-4 z-10"
-    >
-      <span class="live-badge flex items-center space-x-1">
-        <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-        <span>LIVE</span>
-      </span>
-    </div>
-
     <!-- Custom Controls -->
     <div
       v-if="!loading && !error"
