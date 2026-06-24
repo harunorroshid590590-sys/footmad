@@ -30,13 +30,15 @@
 
       <!-- Player + content -->
       <div v-else class="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:items-start">
-        <!-- Main -->
-        <div class="lg:col-span-3 space-y-4">
+        <!-- Player + server tabs. On mobile this is a sticky GRID ITEM, so it stays
+             pinned across the whole page scroll (match info + Up Next). On desktop it
+             sits at the top of the left column (row 1). -->
+        <div class="lg:col-span-3 lg:col-start-1 lg:row-start-1 sticky top-0 z-30 bg-background -mx-2 sm:mx-0 space-y-2 lg:static lg:z-auto lg:bg-transparent lg:space-y-4">
           <!-- Player -->
           <div
             tabindex="0"
             data-focus-default
-            class="relative bg-black overflow-hidden shadow-card outline-none -mx-2 sm:mx-0 aspect-video"
+            class="relative bg-black overflow-hidden shadow-card outline-none aspect-video"
           >
             <!-- Upcoming match with no stream link: countdown until it goes live -->
             <div
@@ -72,8 +74,15 @@
           </div>
 
           <!-- Server tabs (TV-remote navigable: ←/→ to move, OK to switch) -->
-          <ServerTabs :servers="servers" :current="currentServerIndex" @select="switchServer" />
+          <div class="px-2 sm:px-0">
+            <ServerTabs :servers="servers" :current="currentServerIndex" @select="switchServer" />
+          </div>
+        </div>
+        <!-- /player + server tabs grid item -->
 
+        <!-- Match info — scrolls under the pinned player on mobile; sits below the
+             player in the left column on desktop (row 2). -->
+        <div class="lg:col-span-3 lg:col-start-1 lg:row-start-2 space-y-4">
           <!-- Admin banner for this match (clickable to its link) -->
           <component
             v-if="matchBannerUrl"
@@ -134,7 +143,7 @@
         </div>
 
         <!-- Related rail (scrolls independently on desktop) -->
-        <aside class="lg:col-span-1 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <aside class="lg:col-span-1 lg:col-start-4 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto lg:pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           <h3 class="text-white font-semibold mb-3 lg:sticky lg:top-0 lg:bg-background lg:py-1 lg:z-10">Up Next</h3>
           <div v-if="related.length" class="grid grid-cols-2 lg:grid-cols-1 gap-3">
             <MatchCard v-for="m in related" :key="m.id" :match="m" compact />
