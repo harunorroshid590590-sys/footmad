@@ -61,9 +61,9 @@
                     Delete
                   </button>
                 </template>
-                <!-- Provider matches: edit links / reset to API / hide. -->
+                <!-- Provider matches: full edit / reset to API / hide. -->
                 <template v-else>
-                  <button @click="openEdit(match)" class="text-primary hover:text-primary-light">Edit</button>
+                  <button @click="$emit('edit', match)" class="text-primary hover:text-primary-light">Edit</button>
                   <button
                     v-if="match.isEdited"
                     @click="resetLinks(match)"
@@ -95,86 +95,15 @@
       <div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
     </div>
 
-    <!-- ===== Edit links modal ===== -->
-    <div
-      v-if="editing"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70"
-      @click.self="closeEdit"
-    >
-      <div class="bg-card border border-border rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-border">
-          <div>
-            <h2 class="text-lg font-bold text-white">Edit Streams</h2>
-            <p class="text-xs text-text-muted mt-0.5">{{ editing.homeTeam || 'Home' }} vs {{ editing.awayTeam || 'Away' }}</p>
-          </div>
-          <button @click="closeEdit" class="text-text-muted hover:text-white text-xl leading-none">&times;</button>
-        </div>
-
-        <div class="px-6 py-4 overflow-y-auto space-y-3">
-          <p class="text-xs text-text-muted">
-            Add or update stream links for this match. Saving replaces the API links until you press
-            <span class="text-amber-400 font-medium">Reset</span>, which restores the original API links.
-          </p>
-
-          <div
-            v-for="(row, idx) in editRows"
-            :key="idx"
-            class="border border-border rounded-xl p-3 space-y-2 bg-surface/40"
-            :class="{ 'opacity-60': row.hidden }"
-          >
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-text-muted flex items-center gap-2">
-                Stream {{ idx + 1 }}
-                <span v-if="row.hidden" class="text-[10px] font-semibold uppercase tracking-wider bg-white/10 text-text-muted border border-border px-1.5 py-0.5 rounded">Hidden</span>
-              </span>
-              <div class="flex items-center gap-3">
-                <button
-                  @click="row.hidden = !row.hidden"
-                  class="text-xs"
-                  :class="row.hidden ? 'text-emerald-400 hover:text-emerald-300' : 'text-text-muted hover:text-white'"
-                >
-                  {{ row.hidden ? 'Show' : 'Hide' }}
-                </button>
-                <button @click="removeRow(idx)" class="text-red-500 hover:text-red-400 text-xs">Remove</button>
-              </div>
-            </div>
-            <input
-              v-model="row.title"
-              placeholder="Title (e.g. HD, Server 1)"
-              class="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-white placeholder:text-text-muted focus:border-primary outline-none"
-            />
-            <input
-              v-model="row.link"
-              placeholder="Stream URL (.m3u8 / .mpd)  — optional headers: url|Referer=...&Origin=..."
-              class="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-white placeholder:text-text-muted focus:border-primary outline-none font-mono"
-            />
-            <input
-              v-model="row.drmKey"
-              placeholder="DRM key (optional, e.g. keyId:key)"
-              class="w-full bg-card border border-border rounded-lg px-3 py-2 text-sm text-white placeholder:text-text-muted focus:border-primary outline-none font-mono"
-            />
-          </div>
-
-          <button
-            @click="addRow"
-            class="w-full border border-dashed border-border hover:border-primary text-text-muted hover:text-primary rounded-xl py-2.5 text-sm transition-colors"
-          >
-            + Add stream link
-          </button>
-        </div>
-
-        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-border">
-          <button @click="closeEdit" class="px-4 py-2 text-sm text-text-muted hover:text-white">Cancel</button>
-          <button
-            @click="saveLinks"
-            :disabled="saving"
-            class="px-5 py-2 text-sm bg-primary hover:bg-primary-dark text-white rounded-lg disabled:opacity-50"
-          >
-            {{ saving ? 'Saving...' : 'Save' }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmModal
+      :open="dialog.open"
+      :title="dialog.title"
+      :message="dialog.message"
+      :confirm-text="dialog.confirmText"
+      :tone="dialog.tone"
+      @confirm="onDialogConfirm"
+      @cancel="onDialogCancel"
+    />
   </div>
 </template>
 
@@ -182,6 +111,7 @@
 import { ref, computed, onMounted } from 'vue'
 import api from '@/utils/axios'
 import { statusOf, sortByPriority } from '@/utils/matchStatus'
+import ConfirmModal from './ConfirmModal.vue'
 
 const emit = defineEmits(['edit', 'changed'])
 
@@ -189,10 +119,15 @@ const matches = ref([])
 const loading = ref(false)
 const busyId = ref(null)
 
-// Edit modal state
-const editing = ref(null)
-const editRows = ref([])
-const saving = ref(false)
+// Promise-based confirm dialog (replaces the browser's native confirm()).
+const dialog = ref({ open: false, title: '', message: '', confirmText: 'Confirm', tone: 'danger' })
+let dialogResolve = null
+const askConfirm = (opts) => new Promise((resolve) => {
+  dialog.value = { open: true, title: 'Are you sure?', message: '', confirmText: 'Confirm', tone: 'danger', ...opts }
+  dialogResolve = resolve
+})
+const onDialogConfirm = () => { dialog.value.open = false; dialogResolve?.(true); dialogResolve = null }
+const onDialogCancel = () => { dialog.value.open = false; dialogResolve?.(false); dialogResolve = null }
 
 // Same ordering as the public site: pinned → live → upcoming (soonest start
 // first) → finished.
@@ -213,56 +148,14 @@ const fetchMatches = async () => {
   }
 }
 
-// Rebuild the editable "url|headers" link string from a normalized server so a
-// round-trip Save preserves any referer/origin/user-agent headers.
-const linkFromServer = (s) => {
-  const base = s.externalUrl || s.url || s.streamUrl || ''
-  const headers = s.headers && typeof s.headers === 'object' ? s.headers : {}
-  const parts = Object.entries(headers).filter(([, v]) => v)
-  if (!parts.length) return base
-  return `${base}|${parts.map(([k, v]) => `${k}=${v}`).join('&')}`
-}
-
-const openEdit = (match) => {
-  editing.value = match
-  editRows.value = (match.servers || []).map((s) => ({
-    title: s.title || s.name || '',
-    link: linkFromServer(s),
-    drmKey: s.drmKey || '',
-    hidden: s.hidden === true
-  }))
-  if (editRows.value.length === 0) addRow()
-}
-
-const closeEdit = () => {
-  editing.value = null
-  editRows.value = []
-}
-
-const addRow = () => editRows.value.push({ title: '', link: '', drmKey: '', hidden: false })
-const removeRow = (idx) => editRows.value.splice(idx, 1)
-
-const saveLinks = async () => {
-  if (!editing.value) return
-  saving.value = true
-  try {
-    const servers = editRows.value
-      .map((r) => ({ title: (r.title || '').trim(), link: (r.link || '').trim(), drmKey: (r.drmKey || '').trim(), hidden: r.hidden === true }))
-      .filter((r) => r.link)
-    await api.put(`/admin/matches/${editing.value.id}/links`, { servers })
-    closeEdit()
-    await fetchMatches()
-    emit('changed')
-  } catch (err) {
-    console.error('Failed to save links:', err)
-    alert('Failed to save links. Please try again.')
-  } finally {
-    saving.value = false
-  }
-}
-
 const resetLinks = async (match) => {
-  if (!confirm('Reset this match to the original API links? Your edited links will be removed.')) return
+  const ok = await askConfirm({
+    title: 'Reset to original data?',
+    message: 'This restores the match to the original API data and removes all your edits (info and links). This cannot be undone.',
+    confirmText: 'Reset',
+    tone: 'warning'
+  })
+  if (!ok) return
   busyId.value = match.id
   try {
     await api.post(`/admin/matches/${match.id}/reset`)
@@ -277,7 +170,15 @@ const resetLinks = async (match) => {
 
 const toggleHide = async (match) => {
   const hidden = !match.isHidden
-  if (hidden && !confirm('Hide this match from the public site?')) return
+  if (hidden) {
+    const ok = await askConfirm({
+      title: 'Hide this match?',
+      message: 'It will be removed from the public site. You can unhide it again anytime.',
+      confirmText: 'Hide',
+      tone: 'danger'
+    })
+    if (!ok) return
+  }
   busyId.value = match.id
   try {
     await api.post(`/admin/matches/${match.id}/hide`, { hidden })
@@ -291,7 +192,13 @@ const toggleHide = async (match) => {
 }
 
 const deleteCustom = async (match) => {
-  if (!confirm('Delete this custom match permanently?')) return
+  const ok = await askConfirm({
+    title: 'Delete this match?',
+    message: `“${match.homeTeam || 'Home'} vs ${match.awayTeam || 'Away'}” will be permanently deleted. This cannot be undone.`,
+    confirmText: 'Delete',
+    tone: 'danger'
+  })
+  if (!ok) return
   busyId.value = match.id
   try {
     await api.delete(`/admin/custom-matches/${match.id}`)

@@ -116,14 +116,25 @@
               No channels yet. Click “+ Add Manually” to add a stream link.
             </div>
 
-            <div v-for="(ch, idx) in form.channels" :key="idx" class="relative border border-border rounded-xl p-4 mb-3 bg-surface/40">
+            <div v-for="(ch, idx) in form.channels" :key="idx" class="relative border border-border rounded-xl p-4 mb-3 bg-surface/40" :class="{ 'opacity-60': ch.hidden }">
               <button type="button" @click="removeChannel(idx)" class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-accent text-white text-xs flex items-center justify-center hover:bg-accent/80">✕</button>
-              <div class="flex items-center gap-3 mb-3">
-                <span class="text-xs font-bold bg-accent/20 text-accent border border-accent/40 rounded px-2 py-1">#{{ idx + 1 }}</span>
-                <div>
-                  <span class="text-text-muted text-[11px] block">Order</span>
-                  <input v-model.number="ch.order" type="number" min="1" class="w-16 bg-card border border-border rounded px-2 py-1 text-sm text-white" />
+              <div class="flex items-center justify-between gap-3 mb-3">
+                <div class="flex items-center gap-3">
+                  <span class="text-xs font-bold bg-accent/20 text-accent border border-accent/40 rounded px-2 py-1">#{{ idx + 1 }}</span>
+                  <div>
+                    <span class="text-text-muted text-[11px] block">Order</span>
+                    <input v-model.number="ch.order" type="number" min="1" class="w-16 bg-card border border-border rounded px-2 py-1 text-sm text-white" />
+                  </div>
+                  <span v-if="ch.hidden" class="text-[10px] font-semibold uppercase tracking-wider bg-white/10 text-text-muted border border-border px-1.5 py-0.5 rounded self-end mb-0.5">Hidden</span>
                 </div>
+                <button
+                  type="button"
+                  @click="ch.hidden = !ch.hidden"
+                  class="text-xs self-end mb-0.5"
+                  :class="ch.hidden ? 'text-emerald-400 hover:text-emerald-300' : 'text-text-muted hover:text-white'"
+                >
+                  {{ ch.hidden ? 'Show' : 'Hide' }}
+                </button>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
@@ -193,7 +204,7 @@ const pasteWrap = 'flex items-stretch bg-background border border-border rounded
 const bareInput = 'flex-1 bg-transparent px-4 py-2.5 text-white outline-none min-w-0'
 const pasteBtn = 'px-3 my-1.5 mr-1.5 text-xs rounded bg-surface border border-border text-text-muted hover:text-white shrink-0'
 
-const blankChannel = () => ({ title: '', type: 'M3U8', link: '', drm: '', order: 1 })
+const blankChannel = () => ({ title: '', type: 'M3U8', link: '', drm: '', hidden: false, order: 1 })
 
 const form = ref({
   category: 'Football',
@@ -250,6 +261,7 @@ watch(() => props.match, (m) => {
       type: (s.type || 'M3U8').toUpperCase() === 'DASH' ? 'DASH' : 'M3U8',
       link: linkFromServer(s),
       drm: s.drmKey || '',
+      hidden: s.hidden === true,
       order: i + 1
     }))
   }
@@ -273,7 +285,7 @@ const removeChannel = (idx) => form.value.channels.splice(idx, 1)
 
 const handleSubmit = () => {
   const channels = form.value.channels
-    .map((c, i) => ({ title: (c.title || '').trim(), type: c.type, link: (c.link || '').trim(), drm: (c.drm || '').trim(), order: Number(c.order) || i + 1 }))
+    .map((c, i) => ({ title: (c.title || '').trim(), type: c.type, link: (c.link || '').trim(), drm: (c.drm || '').trim(), hidden: c.hidden === true, order: Number(c.order) || i + 1 }))
     .filter((c) => c.link)
 
   emit('save', {

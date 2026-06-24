@@ -304,12 +304,15 @@ const editMatch = (match) => {
   showMatchModal.value = true
 }
 
-// Create or update an admin custom match.
+// Save the match modal: editing a custom match → custom endpoint; editing an
+// API match → provider-edit override; nothing being edited → new custom match.
 const saveMatch = async (matchData) => {
   savingMatch.value = true
   try {
     if (editingMatch.value?.isCustom) {
       await api.put(`/admin/custom-matches/${editingMatch.value.id}`, matchData)
+    } else if (editingMatch.value) {
+      await api.put(`/admin/matches/${editingMatch.value.id}`, matchData)
     } else {
       await api.post('/admin/custom-matches', matchData)
     }
