@@ -1,26 +1,34 @@
-// Popunder injector with a click-based cadence: show an ad, leave a GAP of N
-// clicks, then show another ("ad → gap → ad → gap ..."). Popunder network
-// scripts arm once per (re)load and fire on the next user click, so we re-inject
-// (re-arm) the script on the right click to get a repeating cadence.
+// Popunder driver with TWO modes, chosen automatically from the Popunder Code:
 //
-// IMPORTANT: the ad NETWORK's own frequency cap on the popunder zone still
-// applies. For this cadence to actually take effect, set that zone's frequency
-// cap to unlimited in the network dashboard — otherwise the network throttles it
-// regardless of what this code does.
+// 1. SCRIPT mode (default) — the code is an ad-network <script> tag. We inject /
+//    re-arm it on a click cadence so it shows repeatedly. NOTE: the network's own
+//    frequency cap still applies (often ~3 per session) and CANNOT be removed from
+//    code — that cap lives in the network's popunder zone settings.
+//
+// 2. DIRECT-LINK mode — the code is a plain URL (e.g. a network "direct link" /
+//    smartlink). We open it ourselves on the click cadence. This is fully under
+//    our control, so it is NOT subject to the script's 3-per-session cap — use
+//    this when the client wants "every click".
+//
+// GAP_CLICKS controls cadence: 0 = every click, 1 = ad → gap → ad, etc.
 
-const GAP_CLICKS = 1 // ad on a click, then 1 gap click, then ad again (set 0 = every click)
+const GAP_CLICKS = 0 // every click
 
 let started = false
 let clickCount = 0
-let popCode = ''
 
-// (Re)inject the popunder script so it arms for the next click. Old injected
-// scripts are removed first to avoid piling up in the DOM.
-const arm = () => {
-  if (!popCode || !document.body) return
+// A plain http(s) URL with no <script> tag → treat as a direct link.
+const isDirectLink = (s) => {
+  const v = (s || '').trim()
+  return /^https?:\/\/\S+$/i.test(v) && !/<\s*script/i.test(v)
+}
+
+// (Re)inject the network popunder script so it arms for the next click.
+const armScript = (code) => {
+  if (!code || !document.body) return
   document.querySelectorAll('script[data-fm-popunder]').forEach(s => s.remove())
   const holder = document.createElement('div')
-  holder.innerHTML = popCode
+  holder.innerHTML = code
   const scripts = holder.querySelectorAll('script')
   if (!scripts.length) return
   scripts.forEach((old) => {
@@ -33,6 +41,14 @@ const arm = () => {
   })
 }
 
+// Open the direct link as a pop-under (open new tab, keep the current one focused).
+const openDirect = (url) => {
+  try {
+    const w = window.open(url, '_blank')
+    if (w) { w.blur(); window.focus() }
+  } catch { /* popup blocked */ }
+}
+
 export const initPopunder = (config) => {
   if (started) return
   if (typeof window === 'undefined' || !document.body) return
@@ -40,15 +56,24 @@ export const initPopunder = (config) => {
 
   const isMobile = window.innerWidth < 768
   const pop = config?.popunderAds?.[isMobile ? 'mobile' : 'desktop']
-  if (!pop?.enabled || !(pop.code || '').trim()) return
+  const code = (pop?.code || '').trim()
+  if (!pop?.enabled || !code) return
 
-  popCode = pop.code
   started = true
-  arm() // arm for the first click
 
-  // Re-arm after each "ad + gap" cycle so the next eligible click fires again.
+  if (isDirectLink(code)) {
+    // Direct-link mode: open the URL on the click cadence (no network cap).
+    document.addEventListener('click', () => {
+      clickCount++
+      if (clickCount % (GAP_CLICKS + 1) === 0) openDirect(code)
+    }, true)
+    return
+  }
+
+  // Script mode: arm now, then re-arm on the click cadence.
+  armScript(code)
   document.addEventListener('click', () => {
     clickCount++
-    if (clickCount % (GAP_CLICKS + 1) === 0) arm()
+    if (clickCount % (GAP_CLICKS + 1) === 0) armScript(code)
   }, true)
 }
