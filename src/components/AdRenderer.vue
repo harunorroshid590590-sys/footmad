@@ -42,7 +42,7 @@
 import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import AdSlot from './AdSlot.vue'
-import { injectPopunderOnce } from '@/utils/popunder'
+import { initPopunder } from '@/utils/popunder'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
@@ -94,9 +94,9 @@ const getBannerCode = (position) => {
   return banner.code || ''
 }
 
-// Popunder injection is shared with the watch page via a single session-wide
-// guard, so the script loads only once no matter which page the user lands on.
-const showPopunder = () => injectPopunderOnce(config.value)
+// Popunder is shared with the watch page (one init guard); it re-arms on a
+// click cadence so it shows repeatedly with a gap.
+const showPopunder = () => initPopunder(config.value)
 
 const getButtonPositionClass = (position) => {
   switch (position) {
