@@ -1,16 +1,14 @@
-// Popunder driver with TWO modes, chosen automatically from the Popunder Code:
+// Drives BOTH ad types together on a click cadence:
 //
-// 1. SCRIPT mode (default) — the code is an ad-network <script> tag. We inject /
-//    re-arm it on a click cadence so it shows repeatedly. NOTE: the network's own
-//    frequency cap still applies (often ~3 per session) and CANNOT be removed from
-//    code — that cap lives in the network's popunder zone settings.
+// 1. Popunder Ads — the Popunder Code. A <script> is injected/re-armed (the
+//    network self-fires it on clicks; its own frequency cap, often ~3/session,
+//    still applies and cannot be removed from code). A plain URL is opened by us.
 //
-// 2. DIRECT-LINK mode — the code is a plain URL (e.g. a network "direct link" /
-//    smartlink). We open it ourselves on the click cadence. This is fully under
-//    our control, so it is NOT subject to the script's 3-per-session cap — use
-//    this when the client wants "every click".
+// 2. Direct Link Ads — the Direct Link "Redirect URL". We open it on every click.
+//    Fully under our control, so NOT subject to any network frequency cap.
 //
-// GAP_CLICKS controls cadence: 0 = every click, 1 = ad → gap → ad, etc.
+// Both run at the same time when both are enabled.
+// GAP_CLICKS: 0 = every click, 1 = ad → gap → ad, etc.
 
 const GAP_CLICKS = 0 // every click
 
@@ -41,7 +39,7 @@ const armScript = (code) => {
   })
 }
 
-// Open the direct link as a pop-under (open new tab, keep the current one focused).
+// Open a URL as a pop-under (new tab, keep the current tab focused).
 const openDirect = (url) => {
   try {
     const w = window.open(url, '_blank')
@@ -54,26 +52,31 @@ export const initPopunder = (config) => {
   if (typeof window === 'undefined' || !document.body) return
   if (config?.adSettings?.enabled === false) return
 
+  // Direct Link Ads — redirect URL opened on every click (no network cap).
+  const dl = config?.directLinkAds
+  const directUrl = (dl?.enabled && isDirectLink(dl.redirectUrl)) ? dl.redirectUrl.trim() : ''
+
+  // Popunder Ads — script (re-armed) or plain URL (opened).
   const isMobile = window.innerWidth < 768
   const pop = config?.popunderAds?.[isMobile ? 'mobile' : 'desktop']
-  const code = (pop?.code || '').trim()
-  if (!pop?.enabled || !code) return
+  const popCode = (pop?.enabled && (pop.code || '').trim()) ? pop.code.trim() : ''
+  const popIsUrl = popCode && isDirectLink(popCode)
 
+  if (!directUrl && !popCode) return
   started = true
 
-  if (isDirectLink(code)) {
-    // Direct-link mode: open the URL on the click cadence (no network cap).
-    document.addEventListener('click', () => {
-      clickCount++
-      if (clickCount % (GAP_CLICKS + 1) === 0) openDirect(code)
-    }, true)
-    return
-  }
+  // Arm the popunder script up front so the network can fire it on the first click.
+  if (popCode && !popIsUrl) armScript(popCode)
 
-  // Script mode: arm now, then re-arm on the click cadence.
-  armScript(code)
   document.addEventListener('click', () => {
     clickCount++
-    if (clickCount % (GAP_CLICKS + 1) === 0) armScript(code)
+    if (clickCount % (GAP_CLICKS + 1) !== 0) return
+    // Direct link: open every (cadence) click.
+    if (directUrl) openDirect(directUrl)
+    // Popunder: a URL is opened by us; a script is re-armed (it self-fires).
+    if (popCode) {
+      if (popIsUrl) openDirect(popCode)
+      else armScript(popCode)
+    }
   }, true)
 }
