@@ -211,7 +211,9 @@ import Hls from 'hls.js'
 import shaka from 'shaka-player'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5007/api'
-const PROXY_BASE_URL = API_URL.replace(/\/api$/, '')
+// Stream proxy lives on the real backend (works cross-origin). When the API is a
+// same-origin proxy ("/api"), VITE_BACKEND_ORIGIN gives the real backend origin.
+const PROXY_BASE_URL = (import.meta.env.VITE_BACKEND_ORIGIN || API_URL).replace(/\/api\/?$/, '')
 
 const props = defineProps({
   stream: {

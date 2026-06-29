@@ -3,8 +3,10 @@
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5007/api'
 
-// Strip a trailing "/api" so we can reach static assets served at the origin root.
-export const API_ORIGIN = API_URL.replace(/\/api\/?$/, '')
+// Backend origin for static assets (uploads). When the API is reached through a
+// same-origin proxy (VITE_API_URL="/api"), VITE_BACKEND_ORIGIN points to the real
+// backend; otherwise we derive it from the API URL.
+export const API_ORIGIN = (import.meta.env.VITE_BACKEND_ORIGIN || API_URL).replace(/\/api\/?$/, '')
 
 export const resolveAsset = (url) => {
   if (!url) return ''
